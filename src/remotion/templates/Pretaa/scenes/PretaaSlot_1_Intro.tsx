@@ -173,7 +173,7 @@ const ChatBubble = ({ x, y, text, delay, direction = 'left', active = false }: a
 };
 
 import { ThemeStyles } from '../components/ThemeEngine';
-import { WidgetRenderer } from '../components/Widgets/WidgetRenderer';
+import { WidgetRenderer } from '../components/components/Widgets/WidgetRenderer';
 import { LayoutPlan } from '@/lib/types';
 
 export const PretaaSlot1Intro = ({

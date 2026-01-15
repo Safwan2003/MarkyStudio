@@ -69,4 +69,9 @@ export interface VideoScript {
         bodyFont?: string;
         borderRadius?: string;
     };
+    // Legacy fields for Pretaa compatibility
+    globalDesign?: any;
+    brandColor?: string;
+    brandName?: string;
+    theme?: any;
 }

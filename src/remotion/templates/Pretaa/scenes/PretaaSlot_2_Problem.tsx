@@ -148,8 +148,8 @@ const GlassMoney = ({ delay }: any) => {
 };
 
 import { ThemeStyles } from '../components/ThemeEngine';
-import { WidgetRenderer } from '../components/Widgets/WidgetRenderer';
-import { LayoutPlan } from '../../../../types/SceneDirector';
+import { WidgetRenderer } from '../components/components/Widgets/WidgetRenderer';
+import { LayoutPlan } from '@/lib/types';
 
 export const PretaaSlot2Problem = ({
     title,

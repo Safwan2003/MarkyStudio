@@ -1,6 +1,5 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, spring, interpolate, AbsoluteFill } from 'remotion';
-import { useCurrentFrame, useVideoConfig, spring, interpolate, AbsoluteFill } from 'remotion';
 import { FloatingElement } from '@/lib/types';
 
 const FloatingItem = ({ element }: { element: FloatingElement }) => {

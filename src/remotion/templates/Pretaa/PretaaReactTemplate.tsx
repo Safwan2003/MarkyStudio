@@ -1,16 +1,16 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame } from 'remotion';
 import { TransitionSeries, springTiming } from '@remotion/transitions';
-import { DynamicCamera } from './components/DynamicCamera';
-import { PerspectiveSwitcher } from './components/PerspectiveSwitcher';
-import { CinematicOverlay } from './components/CinematicOverlay';
+import { DynamicCamera } from './components/components/DynamicCamera';
+import { PerspectiveSwitcher } from './components/components/PerspectiveSwitcher';
+import { CinematicOverlay } from './components/components/CinematicOverlay';
 import { slide } from '@remotion/transitions/slide';
 import { fade } from '@remotion/transitions/fade';
 
 // Generic Components
 import { GenericIntro } from './scenes/GenericIntro';
 import { GenericFeatures } from './scenes/GenericFeatures';
-import { AudioHandler } from './components/AudioHandler';
+import { AudioHandler } from './components/components/AudioHandler';
 
 // Types
 import { Scene as VideoScene, VideoScript as VideoPlan } from '@/lib/types';
