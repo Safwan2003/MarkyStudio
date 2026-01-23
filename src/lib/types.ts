@@ -1,77 +1,138 @@
-export type SceneType = 'Intro' | 'Problem' | 'Solution' | 'Feature' | 'CTA' | 'Testimonial';
+export type SceneType = 'hook' | 'intro' | 'problem' | 'solution' | 'showcase' | 'social_proof' | 'social-proof' | 'cta' | 'kinetic_typo' | 'device_showcase' | 'bento_grid' | 'isometric_illustration' | 'cta_finale' | 'slot_transition' | 'title_card' | 'image_full' | 'dashboard' | 'transition_how';
+
+export interface SceneConfig {
+    layoutVariant?: "centered" | "split" | "offset" | "default";
+    animationStyle?: "fade" | "slide" | "zoom" | "typewriter" | "bounce" | "reveal";
+    pacing?: "slow" | "medium" | "fast";
+    emphasis?: "text" | "visual" | "balanced";
+}
 
 export interface Scene {
-    id: string; // Unique ID for keys
+    id: string | number; // Support both for now, ideally string
     type: SceneType;
-    text: string; // Main headline
-    subText?: string; // Secondary text
-    voiceOverFragment: string; // The part of the script spoken during this scene
-    durationInSeconds: number; // Estimated duration
-    visualCue?: string; // For abstract visuals (e.g. "Rising graph")
-    highlightColor?: string; // Optional override
-    audioUrl?: string; // Generated Audio Path
-    // Enhanced fields for Pretaa/Viable
-    title?: string;
-    // subText already defined above
-    mainText?: string; // often acts as title
-    backgroundColor?: string;
-    mainTextColor?: string;
-    elements?: any[]; // Visual elements (badges, cards)
-    config?: {
-        layoutVariant?: "centered" | "split" | "offset" | "default";
-        animationStyle?: "fade" | "slide" | "zoom" | "typewriter" | "bounce";
-        pacing?: "slow" | "medium" | "fast";
-        emphasis?: "text" | "visual" | "balanced";
-    };
-    // Specific props
-    screenshotUrl?: string;
+    duration: number; // In seconds (was durationInSeconds)
+    audioUrl?: string; // Voiceover audio URL
+
+    // Standardized Content Fields
+    mainText?: string; // Replaces title, text, headline
+    subText?: string;  // Replaces description, subtitle
+    voiceoverScript?: string; // For TTS generation
+
+    // Visual Assets
+    screenshotUrl?: string; // For device showcases
     mobileScreenshotUrl?: string;
-    features?: { title: string; description: string; icon?: string }[];
-    quote?: string;
-    author?: string;
+    icon?: string;
+
+    // Structured Data
+    features?: { title: string; subtitle?: string; description?: string; icon?: string }[];
+    testimonials?: { quote: string; author: string; role?: string; avatar?: string }[];
+    stats?: { value: string; label: string }[];
+
+    // Action
     ctaText?: string;
-    domain?: string;
-    // Legacy/Template-specific fields (Pretaa)
-    director?: any;
-    theme?: any;
-    bentoItems?: any[];
-    ctaUrl?: string;
-    notificationText?: string;
-}
+    ctaUrl?: string; // Replaces domain
 
-export interface FloatingElement {
-    type: 'notification' | 'stat_card' | 'feature_badge' | 'testimonial_bubble' | string;
-    text?: string;
-    label?: string;
-    value?: string;
-    color?: string;
-    position: { top: string | number; left: string | number };
-    delay?: number;
-}
+    // Styling & Behavior
+    config?: SceneConfig;
 
-export interface LayoutPlan {
-    components?: any[];
-    camera?: any;
-    compositionPerspective?: any;
+    // Legacy/Template Specific (To be deprecated but kept for now if heavily used in components)
+    // director?: any; // REMOVED: Strict Mode
+    // theme?: any;    // REMOVED: Strict Mode
+    // bentoItems?: any[]; // REMAPPED to features
 }
 
 export interface VideoScript {
-    title: string;
-    scenes: Scene[];
-    globalStyle: {
+    brandName: string;
+    brandColor?: string; // Hex
+    globalDesign: {
         primaryColor: string;
+        secondaryColor: string;
+        accentColor: string;
         backgroundColor: string;
-        fontFamily: string;
-        accentColor?: string;
-        secondaryColor?: string;
-        textColor?: string;
-        headingFont?: string;
-        bodyFont?: string;
+        textColor: string;
+        headingFont: string;
+        bodyFont: string;
         borderRadius?: string;
+        animationSpeed?: "slow" | "medium" | "fast";
+        transitionStyle?: "slide" | "fade" | "wipe" | "zoom";
+        backgroundStyle?: "gradient" | "solid" | "video";
+        personality?: {
+            industry?: string;
+            tone?: string;
+            targetEmotion?: string;
+            visualMetaphor?: string;
+        };
     };
-    // Legacy fields for Pretaa compatibility
-    globalDesign?: any;
-    brandColor?: string;
-    brandName?: string;
-    theme?: any;
+    scenes: Scene[];
+}
+
+// Helper types for components
+export interface ThemeStyles {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+    headingFont: string;
+    bodyFont: string;
+    borderRadius: string;
+}
+
+export interface LayoutPlan {
+    camera?: {
+        initialZoom?: number;
+        targetZoom?: number;
+        panX?: number;
+        panY?: number;
+        type?: 'zoom' | 'pan' | 'static';
+    };
+    compositionPerspective?: string;
+    components?: any[];
+}
+
+// Interaction & Widget Types
+export interface InteractionEvent {
+    type: 'click' | 'hover' | 'scroll';
+    targetId?: string;
+    timestamp: number;
+    duration?: number;
+    coords?: { x: number; y: number };
+    triggers?: {
+        onStart?: string[];
+        onComplete?: string[];
+    };
+}
+
+export interface InteractionMap {
+    events: InteractionEvent[];
+}
+
+export interface ComponentOverride {
+    id: string;
+    type: string;
+    content?: {
+        text?: string;
+        imageUrl?: string;
+        [key: string]: any;
+    };
+    style?: {
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+        color?: string;
+        backgroundColor?: string;
+        opacity?: number;
+        scale?: number;
+        zIndex?: number;
+        borderRadius?: number;
+        boxShadow?: string;
+        [key: string]: any;
+    };
+    entrance?: {
+        type?: 'fade' | 'slide' | 'pop';
+        delay?: number;
+        duration?: number;
+    };
+    [key: string]: any;
 }

@@ -1,120 +1,303 @@
+
 "use client";
 
-import React, { useState } from "react";
-import { Player } from "@remotion/player";
-import { SaasExplainerTemplate } from "@/remotion/templates/SaasExplainer";
-import { generateVideoScript, generateVideoAudio } from "./actions";
+import { useState, useRef } from "react";
+import { Player, PlayerRef } from "@remotion/player";
+import { PretaaTemplate } from "@/remotion/templates/Pretaa";
+import { ViableTemplate } from "@/remotion/templates/Viable";
+import { JustCallTemplate } from "@/remotion/templates/JustCall";
+import { DesklogTemplate } from "@/remotion/templates/Desklog";
+import { FronterTemplate } from "@/remotion/templates/Fronter";
+import { generateVideoScript, generateVideoAudio, TemplateType } from "./actions";
 import { VideoScript } from "@/lib/types";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Default placeholder script
+// Default placeholder script for Fronter
 const DEFAULT_SCRIPT: VideoScript = {
-  title: "Example Video",
-  globalStyle: {
-    primaryColor: "#3B82F6",
-    backgroundColor: "#000000",
-    fontFamily: "Inter"
+  brandName: "Fronter AI",
+  globalDesign: {
+    primaryColor: "#2563EB",
+    secondaryColor: "#1e293b",
+    accentColor: "#f59e0b",
+    backgroundColor: "#ffffff",
+    textColor: "#0f172a",
+    headingFont: "Inter",
+    bodyFont: "Inter"
   },
   scenes: [
     {
       id: "1",
-      type: "Intro",
-      text: "Transform Reality",
-      subText: "AI-Powered Video",
-      voiceOverFragment: "Welcome to the future of video creation.",
-      durationInSeconds: 3,
-      audioUrl: "/generated/test.mp3" // Fallback if exists
+      type: "hook",
+      mainText: "Feedback Loop Chaos",
+      subText: "Stop hunting for final assets",
+      voiceoverScript: "Is your agency stuck in a feedback loop chaos?",
+      duration: 5,
+    },
+    {
+      id: "2",
+      type: "problem",
+      mainText: "Too many cooks?",
+      subText: "Zero coordination.",
+      voiceoverScript: "Too many stakeholders, too little coordination.",
+      duration: 5,
+    },
+    {
+      id: "3",
+      type: "solution",
+      mainText: "Meet Fronter",
+      subText: "Launch Project",
+      voiceoverScript: "Enter Fronter. The unified OS for your agency.",
+      duration: 5,
+    },
+    {
+      id: "4",
+      type: "showcase",
+      mainText: "Complete Control",
+      voiceoverScript: "Manage projects, assets, and teams in one place.",
+      duration: 6,
+    },
+    {
+      id: "5",
+      type: "social_proof",
+      mainText: "Trusted by Agencies",
+      voiceoverScript: "Join hundreds of top-tier agencies moving faster with Fronter.",
+      duration: 5,
+      testimonials: [
+        { quote: "Fronter cut our feedback loops in half.", author: "Sarah J., Creative Director" }
+      ]
+    },
+    {
+      id: "6",
+      type: "cta",
+      mainText: "Agency OS",
+      ctaText: "Get Started",
+      voiceoverScript: "Upgrade your agency to Fronter today.",
+      duration: 5,
     }
   ]
 };
 
+// --- Scene Timeline Component ---
+const SceneTimeline = ({ scenes, totalDuration, onSceneClick }: { scenes: any[], totalDuration: number, onSceneClick?: (time: number) => void }) => {
+  return (
+    <div className="w-full h-12 flex gap-1 mt-4 relative group">
+      {scenes.map((scene, idx) => {
+        const widthPercent = ((scene.duration || 5) / totalDuration) * 100;
+        return (
+          <div
+            key={idx}
+            className="h-full bg-zinc-900 border border-white/10 first:rounded-l-lg last:rounded-r-lg relative overflow-hidden hover:bg-zinc-800 transition-colors cursor-pointer group/scene"
+            style={{ width: `${widthPercent}%` }}
+            onClick={() => {
+              let startTime = 0;
+              for (let i = 0; i < idx; i++) {
+                startTime += (scenes[i].duration || 5);
+              }
+              onSceneClick?.(startTime);
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center p-1">
+              <span className="text-[10px] font-mono text-gray-500 truncate group-hover/scene:text-white transition-colors">
+                {scene.type.replace('_', ' ')}
+              </span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  );
+};
+
 export default function Home() {
-  const [prompt, setPrompt] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [prompt, setPrompt] = useState("Fronter is an AI-powered operating system for modern creative agencies. It centralizes feedback, project management, and asset delivery into one sleek dashboard. It eliminates 'feedback loop chaos' and helps teams stay coordinated.");
+  const [productUrl, setProductUrl] = useState("https://fronter.ai/");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [wizardStep, setWizardStep] = useState<'aesthetic' | 'content'>('aesthetic'); // Start at aesthetic for quick preview
+
   const [script, setScript] = useState<VideoScript>(DEFAULT_SCRIPT);
   const [status, setStatus] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('Fronter');
+
+  const playerRef = useRef<PlayerRef>(null);
 
   const handleGenerate = async () => {
     try {
-      setLoading(true);
-      setStatus("Generating Script...");
+      setCurrentStep(1);
+      setStatus("🧠 Creative Director is brainstorming script...");
 
-      const generatedScript = await generateVideoScript(prompt);
+      const fullPrompt = `Product URL: ${productUrl}\n\nDescription:\n${prompt}`;
+      const generatedScript = await generateVideoScript(fullPrompt, selectedTemplate);
 
-      setStatus("Generating Audio (this may take a moment)...");
-      const scriptWithAudio = await generateVideoAudio(generatedScript);
+      setStatus("🎙️ Recording Voiceovers (AI)...");
+      const scriptWithAudio = await generateVideoAudio(generatedScript, selectedTemplate);
 
       setScript(scriptWithAudio);
-      setStatus("Ready!");
+      setStatus("✨ Rendering Preview...");
+      setCurrentStep(2);
     } catch (e) {
       console.error(e);
-      setStatus("Error: " + (e as Error).message);
-    } finally {
-      setLoading(false);
+      setCurrentStep(0);
+      alert("Error: " + (e as Error).message);
     }
   };
 
+  const TEMPLATES = {
+    'Pretaa': PretaaTemplate,
+    'Viable': ViableTemplate,
+    'JustCall': JustCallTemplate,
+    'Desklog': DesklogTemplate,
+    'Fronter': FronterTemplate,
+  };
+  const TemplateComponent = TEMPLATES[selectedTemplate];
+
+  const totalDuration = script.scenes.reduce((acc, s) => acc + (s.duration || 5), 0);
+
   return (
-    <div className="min-h-screen bg-black text-white p-8 font-sans">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="min-h-screen bg-[#020202] text-white font-sans selection:bg-indigo-500/30">
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black pointer-events-none z-0" />
 
-        {/* Controls */}
-        <div className="space-y-6">
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-            SaaS Video AI
-          </h1>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-400">What is your product?</label>
-            <textarea
-              className="w-full h-32 bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. A CRM for freelance designers that automates invoicing."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
+      <header className="border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center font-bold text-lg shadow-lg shadow-indigo-500/20 cursor-pointer" onClick={() => setCurrentStep(0)}>M</div>
+            <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Marky Studio</span>
           </div>
+        </div>
+      </header>
 
-          <button
-            onClick={handleGenerate}
-            disabled={loading || !prompt}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-bold transition-all"
-          >
-            {loading ? "Generating..." : "Generate Video"}
-          </button>
+      <main className="relative z-10 max-w-7xl mx-auto p-6 mt-6 box-border">
 
-          {status && (
-            <div className="p-4 bg-gray-900 rounded-lg border border-gray-800 text-sm font-mono text-cyan-400">
-              > {status}
+        {currentStep === 0 && (
+          <div className="max-w-4xl mx-auto">
+            <AnimatePresence mode="wait">
+              {wizardStep === 'aesthetic' && (
+                <motion.div
+                  key="aesthetic"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="space-y-8"
+                >
+                  <div className="text-center space-y-2">
+                    <h2 className="text-3xl font-bold">Choose your aesthetic.</h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Fronter */}
+                    <div
+                      onClick={() => setSelectedTemplate('Fronter')}
+                      className={`relative group aspect-video rounded-3xl border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplate === 'Fronter' ? 'border-yellow-500 shadow-2xl shadow-yellow-500/20' : 'border-white/10 hover:border-white/30'}`}
+                    >
+                      <div className="absolute inset-x-0 bottom-0 p-6 z-10 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="text-xl font-bold mb-1 flex items-center gap-2 text-yellow-500">💠 Fronter</div>
+                        <p className="text-xs text-gray-300">Agency Quality, Collaborative Chaos.</p>
+                      </div>
+                    </div>
+
+                    {/* Desklog */}
+                    <div
+                      onClick={() => setSelectedTemplate('Desklog')}
+                      className={`relative group aspect-video rounded-3xl border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplate === 'Desklog' ? 'border-emerald-500 shadow-2xl shadow-emerald-500/20' : 'border-white/10 hover:border-white/30'}`}
+                    >
+                      <div className="absolute inset-x-0 bottom-0 p-6 z-10 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="text-xl font-bold mb-1 flex items-center gap-2 text-emerald-500">⏱️ Desklog</div>
+                        <p className="text-xs text-gray-300">Clean Productivity, Emerald Theme.</p>
+                      </div>
+                    </div>
+
+                    {/* Pretaa */}
+                    <div
+                      onClick={() => setSelectedTemplate('Pretaa')}
+                      className={`relative group aspect-video rounded-3xl border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplate === 'Pretaa' ? 'border-indigo-500 shadow-2xl shadow-indigo-500/20' : 'border-white/10 hover:border-white/30'}`}
+                    >
+                      <div className="absolute inset-x-0 bottom-0 p-6 z-10 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="text-xl font-bold mb-1 flex items-center gap-2 text-indigo-500">🌌 Pretaa</div>
+                        <p className="text-xs text-gray-300">Isometric 3D, High-Tech Dark Mode.</p>
+                      </div>
+                    </div>
+
+                    {/* Viable */}
+                    <div
+                      onClick={() => setSelectedTemplate('Viable')}
+                      className={`relative group aspect-video rounded-3xl border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplate === 'Viable' ? 'border-slate-400 shadow-2xl shadow-slate-400/20' : 'border-white/10 hover:border-white/30'}`}
+                    >
+                      <div className="absolute inset-x-0 bottom-0 p-6 z-10 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="text-xl font-bold mb-1 flex items-center gap-2 text-slate-200">⚪ Viable</div>
+                        <p className="text-xs text-gray-300">Minimalist Flat, Apple-Style Light.</p>
+                      </div>
+                    </div>
+
+                    {/* JustCall */}
+                    <div
+                      onClick={() => setSelectedTemplate('JustCall')}
+                      className={`relative group aspect-video rounded-3xl border-2 transition-all overflow-hidden cursor-pointer ${selectedTemplate === 'JustCall' ? 'border-pink-500 shadow-2xl shadow-pink-500/20' : 'border-white/10 hover:border-white/30'}`}
+                    >
+                      <div className="absolute inset-x-0 bottom-0 p-6 z-10 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="text-xl font-bold mb-1 flex items-center gap-2 text-pink-500">⚡ JustCall</div>
+                        <p className="text-xs text-gray-300">Kinetic Typography, Energetic Vibez.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center pt-4">
+                    <button onClick={() => setCurrentStep(2)} className="px-8 py-3 bg-white text-black rounded-lg font-bold">Quick Preview &rarr;</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {currentStep === 1 && (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+            <div className="relative w-24 h-24">
+              <div className="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-spin" />
             </div>
-          )}
-
-          <div className="p-4 bg-gray-900 rounded-lg border border-gray-800 h-96 overflow-y-auto font-mono text-xs">
-            <pre>{JSON.stringify(script, null, 2)}</pre>
+            <h3 className="text-2xl font-bold animate-pulse">{status || 'Processing...'}</h3>
           </div>
-        </div>
+        )}
 
-        {/* Player */}
-        <div className="flex flex-col items-center justify-start space-y-4">
-          <div className="w-full aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-2xl border border-gray-800 relative">
-            <Player
-              component={AgencyComposition}
-              inputProps={{ script }}
-              durationInFrames={script.scenes.reduce((acc, s) => acc + (s.durationInSeconds || 5) * 30, 0)}
-              compositionWidth={1920}
-              compositionHeight={1080}
-              fps={30}
-              style={{
-                width: '100%',
-                height: '100%',
-              }}
-              controls
-            />
-          </div>
-          <p className="text-gray-500 text-sm">
-            Total Duration: {script.scenes.reduce((acc, s) => acc + (s.durationInSeconds || 5), 0)}s
-          </p>
-        </div>
+        {currentStep === 2 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+          >
+            <div className="lg:col-span-8">
+              <div className="bg-[#050505] border border-white/10 rounded-3xl p-2 shadow-2xl">
+                <div className="w-full aspect-video rounded-2xl overflow-hidden bg-zinc-950 relative">
+                  <Player
+                    ref={playerRef}
+                    component={TemplateComponent as any}
+                    inputProps={{ plan: script }}
+                    durationInFrames={Math.ceil(Math.max(1, totalDuration * 30))}
+                    compositionWidth={1920}
+                    compositionHeight={1080}
+                    fps={30}
+                    style={{ width: '100%', height: '100%' }}
+                    controls
+                    autoPlay
+                    acknowledgeRemotionLicense
+                  />
+                </div>
+              </div>
 
-      </div>
+              <SceneTimeline
+                scenes={script.scenes}
+                totalDuration={totalDuration}
+                onSceneClick={(time) => {
+                  if (playerRef.current) playerRef.current.seekTo(time * 30);
+                }}
+              />
+            </div>
+
+            <div className="lg:col-span-4 space-y-6">
+              <div className="p-4 border border-white/5 bg-white/5 rounded-2xl">
+                <h3 className="font-bold mb-4">Current Template: {selectedTemplate}</h3>
+                <button onClick={() => setCurrentStep(0)} className="w-full py-3 bg-white text-black rounded-xl font-bold">Change Template</button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+      </main>
     </div>
   );
 }
