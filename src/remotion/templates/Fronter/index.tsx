@@ -1,49 +1,80 @@
+import React from 'react';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
+import { VideoScript, ThemeStyles } from '@/lib/types';
 
-import { AbsoluteFill, useVideoConfig, useCurrentFrame } from 'remotion';
-import { getThemeStyles } from './components/ThemeEngine';
 import { Intro } from './scenes/Intro';
 import { Problem } from './scenes/Problem';
 import { Solution } from './scenes/Solution';
 import { Showcase } from './scenes/Showcase';
 import { CTA } from './scenes/CTA';
-import { VideoScript } from '@/lib/types';
 
-export const FronterTemplate = ({ plan }: { plan: VideoScript }) => {
+// Default Theme 
+const getTheme = (script: VideoScript): ThemeStyles => {
+    const global = script?.globalDesign || {};
+    return {
+        primary: global.primaryColor || '#2563EB',
+        secondary: global.secondaryColor || '#1E293B',
+        accent: global.accentColor || '#F59E0B',
+        background: global.backgroundColor || '#FFFFFF',
+        text: global.textColor || '#0F172A',
+        headingFont: global.headingFont || 'Inter',
+        bodyFont: global.bodyFont || 'Inter',
+        borderRadius: global.borderRadius || '24px'
+    };
+};
+
+export const FronterTemplate: React.FC<{ plan: VideoScript }> = ({ plan }) => {
     const frame = useCurrentFrame();
-    const { durationInFrames } = useVideoConfig();
+    const themeStyles = getTheme(plan);
 
-    const brand = plan?.globalDesign?.primaryColor || '#2563EB';
-    const themeStyles = getThemeStyles(brand);
+    // Safety check
+    if (!plan || !plan.scenes) {
+        return <AbsoluteFill style={{ backgroundColor: 'black', color: 'white', justifyContent: 'center', alignItems: 'center' }}>No Script Data</AbsoluteFill>;
+    }
 
-    const scenes = plan?.scenes || [];
-
-    // Duration Logic: Dynamic pacing based on scene.duration
-    if (scenes.length === 0) return <AbsoluteFill style={{ backgroundColor: '#000' }} />;
-
-    let currentScene = scenes[0];
+    // Sequence Logic
+    let currentSceneComponent = null;
     let startFrame = 0;
 
-    for (const scene of scenes) {
+    for (const scene of plan.scenes) {
         const duration = (scene.duration || 5) * 30; // 30fps default
+
+        // Is this the active scene?
         if (frame >= startFrame && frame < startFrame + duration) {
-            currentScene = scene;
+
+            // Map scene type to Component
+            switch (scene.type) {
+                case 'hook':
+                case 'intro':
+                    currentSceneComponent = <Intro scene={scene} themeStyles={themeStyles} />;
+                    break;
+                case 'problem':
+                    currentSceneComponent = <Problem scene={scene} themeStyles={themeStyles} />;
+                    break;
+                case 'solution':
+                    currentSceneComponent = <Solution scene={scene} themeStyles={themeStyles} />;
+                    break;
+                case 'showcase':
+                    currentSceneComponent = <Showcase scene={scene} themeStyles={themeStyles} />;
+                    break;
+                case 'cta':
+                    currentSceneComponent = <CTA scene={scene} themeStyles={themeStyles} />;
+                    break;
+                default:
+                    currentSceneComponent = (
+                        <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+                            <h1 style={{ color: 'white' }}>Unknown Scene Type: {scene.type}</h1>
+                        </AbsoluteFill>
+                    );
+            }
             break;
         }
         startFrame += duration;
     }
 
-    // Safety check: if frame exceeds total duration, show last scene
-    if (frame >= startFrame + (currentScene.duration || 5) * 30) {
-        currentScene = scenes[scenes.length - 1];
-    }
-
     return (
-        <AbsoluteFill style={{ backgroundColor: themeStyles.colors.background }}>
-            {currentScene.type === 'hook' && <Intro scene={currentScene} themeStyles={themeStyles} />}
-            {currentScene.type === 'problem' && <Problem scene={currentScene} themeStyles={themeStyles} />}
-            {currentScene.type === 'solution' && <Solution scene={currentScene} themeStyles={themeStyles} />}
-            {currentScene.type === 'showcase' && <Showcase scene={currentScene} themeStyles={themeStyles} />}
-            {currentScene.type === 'cta' && <CTA scene={currentScene} themeStyles={themeStyles} />}
+        <AbsoluteFill>
+            {currentSceneComponent}
         </AbsoluteFill>
     );
 };

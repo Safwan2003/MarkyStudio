@@ -1,0 +1,802 @@
+
+/* 
+================================================================================
+MARKYSUTDIO INTRO SCENE - COMPLETE COMPONENT LOGIC
+================================================================================
+This file contains the full code for the Intro scene and all its dependencies.
+*/
+
+
+/* ============================================================================
+   FILE: src/remotion/templates/Fronter/scenes/Intro.tsx
+   ============================================================================ */
+import React from 'react';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Img, staticFile } from 'remotion';
+import { Scene, ThemeStyles } from '@/lib/types';
+import { BrandIcons } from '../components/BrandIcons';
+import { ChatBubble } from '../components/ChatBubble';
+import { NoiseOverlay } from '../components/NoiseOverlay';
+
+export const Intro: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ scene, themeStyles }) => {
+    const frame = useCurrentFrame();
+    const { fps, width, height } = useVideoConfig();
+
+    const mainText = scene.mainText || "Mockups connects the conceptual structure";
+
+    // Camera Movement (Slow Dolly In) - Cinematically scales both bg and content
+    // Zoom range: 1.0 -> 1.05 (subtle, professional)
+    const cameraZoom = interpolate(frame, [0, 120], [1, 1.05], { extrapolateRight: 'clamp' });
+
+    // Floating App Icons Configuration (Matches Reference Layout - ENHANCED VISIBILITY)
+    const floatingIcons = [
+        // Top Left Cluster
+        {
+            Icon: BrandIcons.Avatar2, x: 0.15, y: 0.20, delay: 30, size: 140,
+            hasBadge: true, badge: <BrandIcons.Envelope width={16} height={16} />
+        },
+        {
+            Icon: BrandIcons.Mail, x: 0.22, y: 0.35, delay: 35, size: 100,
+            hasBadge: true, badge: '50'
+        },
+
+        // Top Right Cluster
+        { Icon: BrandIcons.Dropbox, x: 0.82, y: 0.18, delay: 40, size: 110, hasBadge: false },
+        { Icon: BrandIcons.Skype, x: 0.60, y: 0.12, delay: 45, size: 90, hasBadge: false },
+        { Icon: BrandIcons.TeamViewer, x: 0.55, y: 0.15, delay: 43, size: 85, hasBadge: false }, // Added TeamViewer matches reference
+
+        // Bottom Left Cluster
+        {
+            Icon: BrandIcons.WhatsApp, x: 0.12, y: 0.55, delay: 50, size: 120,
+            hasBadge: true, badge: '33'
+        },
+        { Icon: BrandIcons.PDF, x: 0.28, y: 0.82, delay: 55, size: 90, hasBadge: false },
+
+        // Bottom Right Cluster
+        {
+            Icon: BrandIcons.Avatar1, x: 0.85, y: 0.70, delay: 60, size: 150,
+            hasBadge: true, badge: <BrandIcons.Phone width={16} height={16} />
+        },
+        { Icon: BrandIcons.Slack, x: 0.75, y: 0.55, delay: 65, size: 85, hasBadge: false },
+
+        // Misc
+        { Icon: BrandIcons.Google, x: 0.50, y: 0.85, delay: 70, size: 85, hasBadge: false },
+    ];
+
+    // Chat Messages
+    const chatMessages = [
+        {
+            text: "Please change the header of image of the product page to the image I sent you by email!",
+            x: 0.25, y: 0.65, delay: 80, variant: 'green', direction: 'left',
+            Avatar: BrandIcons.Avatar2,
+            timestamp: "16:40"
+        },
+        {
+            text: "Can you increase the font of the second paragraph on the features page?",
+            x: 0.70, y: 0.35, delay: 90, variant: 'blue', direction: 'right',
+            Avatar: BrandIcons.Avatar1,
+            timestamp: "16:42"
+        }
+    ];
+
+    return (
+        <AbsoluteFill style={{ backgroundColor: '#000', overflow: 'hidden' }}>
+
+            {/* 1. Base Layer: Cinematic Background Image (Blank Screen Laptop) */}
+            <AbsoluteFill style={{
+                zIndex: 0,
+                transform: `scale(${cameraZoom})`,
+                transformOrigin: 'center center',
+            }}>
+                <Img
+                    src={staticFile('/fronter_intro_laptop.jpg')}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                    }}
+                />
+            </AbsoluteFill>
+
+            {/* 2. Screen Content Overlay (Perspective Transformed - MATCHED TO Problem.tsx) */}
+            <AbsoluteFill style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 5,
+                transform: `scale(${cameraZoom})`,
+                transformOrigin: 'center 45%', // Matched to Problem.tsx
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: '29.9%',
+                    left: '31.1%',
+                    width: '37.8%',
+                    height: '40.4%',
+                    transform: 'perspective(1500px) rotateX(1.5deg) rotateY(-0.5deg) rotateZ(-0.4deg)',
+                    borderRadius: '2px',
+                    overflow: 'hidden',
+                    backgroundColor: '#0f172a',
+                    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.6), inset 0 0 2px rgba(0,0,0,0.8)',
+                    opacity: interpolate(frame, [0, 10], [0, 1]),
+                }}>
+
+                    {/* Inner Screen Content - "Mockups" Website */}
+                    <div style={{
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: '#ffffff',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        position: 'relative' // For glare
+                    }}>
+
+                        {/* Navbar */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '3% 6%',
+                            height: '15%'
+                        }}>
+                            {/* Logo */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 14, height: 14, borderRadius: '50%', border: '3px solid #1e293b' }} />
+                                <span style={{ fontSize: 8, fontWeight: 700, color: '#1e293b' }}>Company</span>
+                            </div>
+
+                            {/* Nav Links */}
+                            <div style={{ display: 'flex', gap: 15, alignItems: 'center' }}>
+                                {['Features', 'Pricing', 'Blog', 'Help Center'].map((t, i) => (
+                                    <span key={i} style={{ fontSize: 6, color: '#64748b', fontWeight: 500 }}>{t}</span>
+                                ))}
+                                <div style={{ padding: '4px 10px', background: '#4f46e5', borderRadius: 4, color: 'white', fontSize: 6, fontWeight: 600 }}>
+                                    Get Started
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hero Section */}
+                        <div style={{
+                            padding: '0 6%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            height: '85%'
+                        }}>
+                            {/* Text Content */}
+                            <div style={{ flex: 1, paddingRight: '5%' }}>
+                                <h1 style={{
+                                    fontFamily: themeStyles.headingFont,
+                                    fontSize: 18,
+                                    fontWeight: 800,
+                                    color: '#0f172a',
+                                    lineHeight: 1.1,
+                                    marginBottom: 10,
+                                    letterSpacing: '-0.02em'
+                                }}>
+                                    Mockups connects the <br /> conceptual structure
+                                </h1>
+                                <p style={{
+                                    fontSize: 6,
+                                    color: '#64748b',
+                                    lineHeight: 1.5,
+                                    marginBottom: 15,
+                                    maxWidth: '80%'
+                                }}>
+                                    Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.
+                                </p>
+                                <div style={{ padding: '6px 14px', background: '#4f46e5', borderRadius: 4, color: 'white', fontSize: 7, fontWeight: 600, width: 'fit-content', boxShadow: '0 4px 6px rgba(79, 70, 229, 0.2)' }}>
+                                    Get Started
+                                </div>
+                            </div>
+
+                            {/* Hero Image (Phone + Dashboard) */}
+                            <div style={{ width: '45%', height: '80%', position: 'relative' }}>
+                                {/* Dark Dashboard Back Layer */}
+                                <div style={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: 0,
+                                    width: '90%',
+                                    height: '90%',
+                                    backgroundColor: '#000000',
+                                    borderRadius: 4,
+                                    border: '1px solid #333'
+                                }} />
+                                {/* Phone Front Layer */}
+                                <div style={{
+                                    position: 'absolute',
+                                    left: 0,
+                                    bottom: 0,
+                                    width: '35%',
+                                    height: '90%',
+                                    backgroundColor: '#1e293b',
+                                    borderRadius: 8,
+                                    border: '2px solid #334155',
+                                    boxShadow: '0 10px 20px rgba(0,0,0,0.3)'
+                                }} />
+                            </div>
+                        </div>
+
+                        {/* Realistic Screen Glare Overlay */}
+                        <div style={{
+                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                            background: 'linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 65%)',
+                            pointerEvents: 'none', zIndex: 10, mixBlendMode: 'overlay'
+                        }} />
+
+                    </div>
+                </div>
+            </AbsoluteFill>
+
+            {/* 3. Overlays Layer (Icons & Chat) */}
+            <AbsoluteFill style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                perspective: '2000px',
+                zIndex: 10,
+                transform: `scale(${cameraZoom})`,
+                transformOrigin: 'center center'
+            }}>
+                <NoiseOverlay opacity={0.05} />
+
+                {/* Floating Icons */}
+                {floatingIcons.map((item, i) => {
+                    if (frame < item.delay) return null;
+
+                    const pop = spring({
+                        frame: frame - item.delay,
+                        fps,
+                        // Smoother, bouncier spring
+                        config: { damping: 12, stiffness: 180, mass: 1.2 }
+                    });
+
+                    // Enhanced Floating Parallax
+                    const floatY = Math.sin((frame - item.delay) / 45 + i) * 15;
+                    const floatX = Math.cos((frame - item.delay) / 60 + i) * 8;
+                    // Scale parallax based on simulated Z-depth
+                    const zScale = 1 + (Math.sin(i * 1324) * 0.1);
+
+                    return (
+                        <div key={i} style={{
+                            position: 'absolute',
+                            left: width * item.x + floatX,
+                            top: height * item.y + floatY,
+                            transform: `scale(${pop * zScale})`,
+                            width: item.size,
+                            height: item.size,
+                            backgroundColor: 'white',
+                            borderRadius: '50%',
+                            boxShadow: '0 30px 60px rgba(0,0,0,0.35), 0 10px 20px rgba(0,0,0,0.2)', // Deep, soft cinematic shadows
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: item.size * 0.2,
+                            zIndex: 30 + i,
+                            border: '3px solid rgba(255,255,255,0.95)' // Crisper, ticker border
+                        }}>
+                            <item.Icon width="100%" height="100%" />
+                            {item.hasBadge && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: -4,
+                                    right: -4,
+                                    minWidth: 32,
+                                    height: 32,
+                                    backgroundColor: (typeof item.badge === 'string' && item.badge.length <= 2) ? '#ef4444' : '#10B981', // Green for icon badges, Red for numbers (generic rule)
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    border: '3px solid white',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    fontSize: 14,
+                                    fontWeight: 700,
+                                    padding: '0 6px',
+                                    boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                                }}>
+                                    {item.badge}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+
+                {/* Chat Bubbles */}
+                {chatMessages.map((msg, i) => (
+                    <ChatBubble
+                        key={i}
+                        //@ts-ignore
+                        x={width * msg.x}
+                        y={height * msg.y}
+                        delay={msg.delay}
+                        text={msg.text}
+                        //@ts-ignore
+                        variant={msg.variant}
+                        avatar={<msg.Avatar width="80%" height="80%" />}
+                        //@ts-ignore
+                        direction={msg.direction}
+                        scale={1.1} // Slightly larger for impact
+                        timestamp={msg.timestamp}
+                    />
+                ))}
+
+            </AbsoluteFill>
+        </AbsoluteFill>
+    );
+};
+
+
+/* ============================================================================
+   FILE: src/remotion/templates/Fronter/components/BrandIcons.tsx
+   ============================================================================ */
+import React from 'react';
+
+export const BrandIcons = {
+    Google: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M23.766 12.2764C23.766 11.4607 23.6999 10.6406 23.5588 9.83807H12.24V14.4591H18.7217C18.4528 15.9494 17.5885 17.2678 16.323 18.1056V21.1039H20.19C22.4608 19.0139 23.7662 15.9274 23.766 12.2764Z" fill="#4285F4" />
+            <path d="M12.2401 24.0008C15.4766 24.0008 18.2059 22.9382 20.1945 21.1039L16.3275 18.1055C15.2517 18.8375 13.8627 19.252 12.2445 19.252C9.11388 19.252 6.45946 17.1399 5.50705 14.3003H1.5166V17.3912C3.55371 21.4434 7.7029 24.0008 12.2401 24.0008Z" fill="#34A853" />
+            <path d="M5.50253 14.3003C5.00236 12.8099 5.00236 11.1961 5.50253 9.70575V6.61481H1.51649C-0.18551 10.0056 -0.18551 14.0004 1.51649 17.3912L5.50253 14.3003Z" fill="#FBBC05" />
+            <path d="M12.2401 4.74966C13.9509 4.7232 15.6044 5.36697 16.8434 6.54867L20.2695 3.12262C18.1001 1.0855 15.2208 -0.034466 12.2401 0.000808666C7.7029 0.000808666 3.55371 2.55822 1.5166 6.61481L5.50264 9.70575C6.45064 6.86173 9.10947 4.74966 12.2401 4.74966Z" fill="#EA4335" />
+        </svg>
+    ),
+    Slack: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M5.042 15.123a2.52 2.52 0 0 1-2.52 2.52 2.52 2.52 0 0 1-2.52-2.52 2.52 2.52 0 0 1 2.52-2.52h2.52v2.52zm3.36 0a2.52 2.52 0 0 1 2.52-2.52 2.52 2.52 0 0 1 2.52 2.52v6.301a2.52 2.52 0 0 1-2.52 2.52 2.52 2.52 0 0 1-2.52-2.52v-6.3zm0-5.88a2.52 2.52 0 0 1-2.52-2.52 2.52 2.52 0 0 1 2.52-2.52 2.52 2.52 0 0 1 2.52 2.52v2.52h-2.52zm0-3.36a2.52 2.52 0 0 1 2.52 2.52 2.52 2.52 0 0 1-2.52 2.52H2.522a2.52 2.52 0 0 1-2.52-2.52 2.52 2.52 0 0 1 2.52-2.52h6.302v2.52zm5.881 3.36a2.52 2.52 0 0 1 2.52-2.52 2.52 2.52 0 0 1 2.52 2.52 2.52 2.52 0 0 1-2.52 2.52h-2.52v-2.52zm-3.36 0a2.52 2.52 0 0 1-2.52 2.52 2.52 2.52 0 0 1-2.52-2.52v-6.3a2.52 2.52 0 0 1 2.52-2.52 2.52 2.52 0 0 1 2.52 2.52v6.3zm3.36 5.88a2.52 2.52 0 0 1 2.52 2.52 2.52 2.52 0 0 1-2.52 2.52 2.52 2.52 0 0 1-2.52-2.52v-2.52h2.52zm0 3.36a2.52 2.52 0 0 1-2.52-2.52 2.52 2.52 0 0 1 2.52-2.52h6.301a2.52 2.52 0 0 1 2.52 2.52 2.52 2.52 0 0 1-2.52 2.52h-6.3z" fill="#E01E5A" />
+        </svg>
+    ),
+    Discord: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M18.942 5.556a16.299 16.299 0 0 0-4.126-1.297c-.178.321-.385.754-.529 1.097a15.175 15.175 0 0 0-4.573 0 11.583 11.583 0 0 0-.535-1.097 16.274 16.274 0 0 0-4.129 1.3 17.57 17.57 0 0 0-2.635 8.666c0 .032.002.064.007.096a15.89 15.89 0 0 0 5.058 2.547 12.338 12.338 0 0 0 1.092-1.772 10.963 10.963 0 0 1-1.739-.838c.143-.105.283-.217.418-.334 3.435 1.597 7.169 1.597 10.553 0 .14.117.282.23.421.334a10.932 10.932 0 0 1-1.739.838 12.308 12.308 0 0 0 1.095 1.772 15.937 15.937 0 0 0 5.068-2.557c.004-.032.006-.063.006-.095a17.545 17.545 0 0 0-2.656-8.66zm-8.353 7.02c-1.023 0-1.86-1.127-1.86-2.507 0-1.38.826-2.507 1.86-2.507 1.043 0 1.886 1.127 1.86 2.507 0 1.38-.817 2.507-1.86 2.507zm6.71 0c-1.023 0-1.86-1.127-1.86-2.507 0-1.38.826-2.507 1.86-2.507 1.043 0 1.886 1.127 1.86 2.507 0 1.38-.817 2.507-1.86 2.507z" fill="#5865F2" />
+        </svg>
+    ),
+    PDF: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <path d="M16 13H8"></path>
+            <path d="M16 17H8"></path>
+            <path d="M10 9H8"></path>
+        </svg>
+    ),
+    Mail: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+        </svg>
+    ),
+    WhatsApp: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M12.009 0C5.393 0 .01 5.383.01 12c0 2.52.784 4.86 2.14 6.84L.733 23.33l4.632-1.215c1.925 1.05 4.12 1.63 6.444 1.63 6.613 0 11.996-5.383 11.996-12S18.623 0 12.009 0zM17.4 17.06c-.23.645-.96 1.18-1.575 1.25-1.07.123-5.26-1.168-7.98-5.877-.38-.658-1.57-2.906-.63-4.085.45-.563.98-.568 1.4-.555.33.01.536.035.733.51.27.65.65 1.696.726 1.83.076.136.02.32-.09.48-.12.164-.24.22-.38.41-.18.23-.39.467-.183.82.21.36 1.35 2.226 2.924 3.63.535.474.96.67 1.31.78.35.114.75.053 1.04-.265.37-.39.78-.97.99-1.32.21-.36.43-.27.72-.16.29.11 1.83.86 2.14 1.02.31.16.51.24.58.37.07.13.07.76-.16 1.4z" fill="#25D366" />
+        </svg>
+    ),
+    Dropbox: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M8 2.5 0 7.75 8 13l8-5.25L8 2.5Zm-8 10.5 8 5.25 8-5.25L8 7.75 0 13Zm16-5.25L24 2.5l-8 5.25L24 13l-8-5.25Zm0 10.5 8-5.25L16 7.75l-8 5.25 8 5.25ZM8 14.5l-8 5.25 12 4.11 12-4.11-8-5.25L8 18.25l-4-2.62 4-1.13Z" fill="#0061FE" />
+        </svg>
+    ),
+    Skype: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M12.965.006c.65.025 1.28.1 1.905.226A11.75 11.75 0 0 1 20.217 3.3a11.58 11.58 0 0 1 3.518 7.377c.105.772.16 1.554.167 2.336-.008 1.488-.23 2.966-.665 4.39a11.97 11.97 0 0 1-2.025 3.868 12.01 12.01 0 0 1-4.043 3.033A11.83 11.83 0 0 1 12 .75a11.83 11.83 0 0 1-5.167-2.554A12.01 12.01 0 0 1 2.79 21.23a11.97 11.97 0 0 1-2.025-3.868 14.93 14.93 0 0 1-.665-4.39c.007-.782.062-1.564.167-2.336A11.58 11.58 0 0 1 3.783 3.3 11.75 11.75 0 0 1 9.13.232c.625-.126 1.255-.201 1.905-.226l.465-.008.465.008ZM12 21.056c3.155 0 6.007-1.306 8-3.393a11.09 11.09 0 0 0 3.303-7.556v-.214a11.09 11.09 0 0 0-3.303-7.556A11.01 11.01 0 0 0 12 .232a11.01 11.01 0 0 0-8 3.393 11.09 11.09 0 0 0-3.303 7.556v.214A11.09 11.09 0 0 0 4 19.893a11.01 11.01 0 0 0 8 3.393Zm0-18.783a8.88 8.88 0 0 1 6.32 2.652A8.96 8.96 0 0 1 20.9 9.893v1.31a8.96 8.96 0 0 1-2.58 4.964A8.88 8.88 0 0 1 12 18.817a8.88 8.88 0 0 1-6.32-2.652 A8.96 8.96 0 0 1 3.1 11.203V9.893a8.96 8.96 0 0 1 2.58-4.964A8.88 8.88 0 0 1 12 2.273ZM5.986 10.74c.963 0 1.912-.132 2.825-.392a8.03 8.03 0 0 0 2.45-1.127 4.14 4.14 0 0 0 1.34-1.616c.307-.704.417-1.482.32-2.25-.094-.698-.313-1.376-.648-1.996a4.23 4.23 0 0 0-1.898-1.74A5.94 5.94 0 0 0 8 1.134a5.95 5.95 0 0 0-3.882 1.385A5.85 5.85 0 0 0 2 6.572c.005.81.166 1.612.476 2.366A5.92 5.92 0 0 0 4.14 10.22c.576.346 1.204.53 1.846.52ZM18.014 13.903a5.96 5.96 0 0 0-2.825.393 8.03 8.03 0 0 0-2.45 1.126 4.14 4.14 0 0 0-1.34 1.616c-.307.704-.417 1.482-.32 2.25.094.698.313 1.376.648 1.996a4.23 4.23 0 0 0 1.9 1.74 5.94 5.94 0 0 0 4.375.485 5.95 5.95 0 0 0 3.882-1.385 5.85 5.85 0 0 0 2.118-4.053c-.005-.81-.166-1.612-.476-2.366a5.92 5.92 0 0 0-1.666-1.282 3.65 3.65 0 0 0-1.846-.52Z" fill="#00AFF0" />
+        </svg>
+    ),
+    Avatar1: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <circle cx="50" cy="50" r="50" fill="#FFC107" />
+            <path d="M50 90C72.0914 90 90 72.0914 90 50C90 27.9086 72.0914 10 50 10C27.9086 10 10 27.9086 10 50C10 72.0914 27.9086 90 50 90Z" fill="#FDB813" />
+            <path d="M50 20C55 20 60 25 60 35C60 45 50 55 50 55C50 55 40 45 40 35C40 25 45 20 50 20Z" fill="#333" />
+            <circle cx="35" cy="45" r="5" fill="#333" />
+            <circle cx="65" cy="45" r="5" fill="#333" />
+            <path d="M30 65C30 65 40 75 50 75C60 75 70 65 70 65" stroke="#333" strokeWidth="5" strokeLinecap="round" />
+        </svg>
+    ),
+    Avatar2: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <circle cx="50" cy="50" r="50" fill="#673AB7" />
+            <circle cx="50" cy="35" r="20" fill="#FFC107" />
+            <path d="M20 90C20 70 35 60 50 60C65 60 80 70 80 90" fill="#FFC107" />
+        </svg>
+    ),
+    Home: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+    ),
+    Activity: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+    ),
+    Settings: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+    ),
+    TeamViewer: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <circle cx="12" cy="12" r="12" fill="#0D4884" />
+            <path d="M7 12L10 9V11H14V9L17 12L14 15V13H10V15L7 12Z" fill="white" />
+        </svg>
+    ),
+    Phone: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+    ),
+    Envelope: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+    )
+};
+
+
+/* ============================================================================
+   FILE: src/remotion/templates/Fronter/components/ChatBubble.tsx
+   ============================================================================ */
+import React from 'react';
+import { spring, useCurrentFrame, useVideoConfig } from 'remotion';
+
+interface ChatBubbleProps {
+    x: number;
+    y: number;
+    delay: number;
+    text: string;
+    avatar?: React.ReactNode;
+    direction?: 'left' | 'right';
+    variant?: 'blue' | 'green' | 'gray';
+    scale?: number;
+    timestamp?: string;
+}
+
+export const ChatBubble: React.FC<ChatBubbleProps> = ({
+    x, y, delay, text, avatar, direction = 'left', variant = 'blue', scale = 1, timestamp
+}) => {
+    const frame = useCurrentFrame();
+    const { fps } = useVideoConfig();
+
+    if (frame < delay) return null;
+
+    const pop = spring({ frame: frame - delay, fps, config: { damping: 14 } });
+    const float = Math.sin((frame + delay) / 30) * 8;
+
+    const colors = {
+        blue: { bg: '#3B82F6', text: 'white' },
+        green: { bg: '#10B981', text: 'white' },
+        gray: { bg: 'white', text: '#1F2937' },
+    };
+
+    const style = colors[variant];
+    const isLeft = direction === 'left';
+
+    return (
+        <div style={{
+            position: 'absolute',
+            left: x, top: y,
+            transform: `translateY(${float}px) scale(${pop * scale})`,
+            display: 'flex',
+            flexDirection: isLeft ? 'row' : 'row-reverse',
+            alignItems: 'flex-end',
+            gap: 12,
+            zIndex: 20
+        }}>
+            {/* Avatar Circle */}
+            <div style={{
+                width: 50, height: 50,
+                borderRadius: '50%',
+                backgroundColor: '#ddd',
+                overflow: 'hidden',
+                border: '3px solid white',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                display: 'flex', justifyContent: 'center', alignItems: 'center'
+            }}>
+                {avatar}
+            </div>
+
+            {/* Bubble */}
+            <div style={{
+                backgroundColor: style.bg,
+                color: style.text,
+                padding: '16px 20px',
+                borderRadius: 24,
+                borderBottomLeftRadius: isLeft ? 4 : 24,
+                borderBottomRightRadius: isLeft ? 24 : 4,
+                boxShadow: '0 8px 24px -6px rgba(0,0,0,0.15)',
+                fontSize: 20,
+                fontWeight: 600,
+                maxWidth: 400,
+                fontFamily: 'Inter, sans-serif',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end'
+            }}>
+                <span style={{ textAlign: 'left', lineHeight: 1.4 }}>{text}</span>
+                {timestamp && (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        marginTop: 4,
+                        fontSize: 12,
+                        opacity: 0.8,
+                        fontWeight: 500
+                    }}>
+                        {timestamp}
+                        {/* Double Check SVG */}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M7 12l5 5 10-10" />
+                            <path d="M2 12l5 5m5-5l5-5" />
+                        </svg>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+
+/* ============================================================================
+   FILE: src/remotion/templates/Fronter/components/NoiseOverlay.tsx
+   ============================================================================ */
+import React from 'react';
+import { AbsoluteFill, random } from 'remotion';
+
+export const NoiseOverlay: React.FC<{ opacity?: number }> = ({ opacity = 0.05 }) => {
+    return (
+        <AbsoluteFill style={{ pointerEvents: 'none', mixBlendMode: 'overlay', opacity, zIndex: 999 }}>
+            <svg width="100%" height="100%">
+                <filter id="noiseFilter">
+                    <feTurbulence
+                        type="fractalNoise"
+                        baseFrequency="0.8"
+                        numOctaves="3"
+                        stitchTiles="stitch"
+                    />
+                </filter>
+                <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+            </svg>
+        </AbsoluteFill>
+    );
+};
+
+
+/* ============================================================================
+   FILE: src/lib/types.ts
+   ============================================================================ */
+export type SceneType = 'hook' | 'intro' | 'problem' | 'solution' | 'showcase' | 'interactive_showcase' | 'social_proof' | 'social-proof' | 'cta' | 'kinetic_typo' | 'device_showcase' | 'bento_grid' | 'isometric_illustration' | 'cta_finale' | 'slot_transition' | 'title_card' | 'image_full' | 'dashboard' | 'transition_how';
+
+export interface SceneConfig {
+    layoutVariant?: "centered" | "split" | "offset" | "default";
+    animationStyle?: "fade" | "slide" | "zoom" | "typewriter" | "bounce" | "reveal";
+    pacing?: "slow" | "medium" | "fast";
+    emphasis?: "text" | "visual" | "balanced";
+}
+
+export interface Scene {
+    id: string | number; // Support both for now, ideally string
+    type: SceneType;
+    duration: number; // In seconds (was durationInSeconds)
+    audioUrl?: string; // Voiceover audio URL
+
+    // Standardized Content Fields
+    mainText?: string; // Replaces title, text, headline
+    subText?: string;  // Replaces description, subtitle
+    voiceoverScript?: string; // For TTS generation
+
+    // Visual Assets
+    screenshotUrl?: string; // For device showcases
+    mobileScreenshotUrl?: string;
+    icon?: string;
+
+    // Structured Data
+    features?: { title: string; subtitle?: string; description?: string; icon?: string }[];
+    testimonials?: { quote: string; author: string; role?: string; avatar?: string }[];
+    stats?: { value: string; label: string }[];
+
+    // Action
+    ctaText?: string;
+    ctaUrl?: string; // Replaces domain
+
+    // Styling & Behavior
+    config?: SceneConfig;
+
+    // Legacy/Template Specific (To be deprecated but kept for now if heavily used in components)
+    // director?: any; // REMOVED: Strict Mode
+    // theme?: any;    // REMOVED: Strict Mode
+    // bentoItems?: any[]; // REMAPPED to features
+
+    // Vision-powered interactive showcase (NEW)
+    subscenes?: Subscene[];
+}
+
+export interface VideoScript {
+    brandName: string;
+    brandColor?: string; // Hex
+    globalDesign: {
+        primaryColor: string;
+        secondaryColor: string;
+        accentColor: string;
+        backgroundColor: string;
+        textColor: string;
+        headingFont: string;
+        bodyFont: string;
+        borderRadius?: string;
+        animationSpeed?: "slow" | "medium" | "fast";
+        transitionStyle?: "slide" | "fade" | "wipe" | "zoom";
+        backgroundStyle?: "gradient" | "solid" | "video";
+        personality?: {
+            industry?: string;
+            tone?: string;
+            targetEmotion?: string;
+            visualMetaphor?: string;
+        };
+    };
+    scenes: Scene[];
+}
+
+// Helper types for components
+export interface ThemeStyles {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+    headingFont: string;
+    bodyFont: string;
+    borderRadius: string;
+}
+
+export interface LayoutPlan {
+    camera?: {
+        initialZoom?: number;
+        targetZoom?: number;
+        panX?: number;
+        panY?: number;
+        type?: 'zoom' | 'pan' | 'static';
+    };
+    compositionPerspective?: string;
+    components?: any[];
+}
+
+// Interaction & Widget Types
+export interface InteractionEvent {
+    type: 'click' | 'hover' | 'scroll';
+    targetId?: string;
+    timestamp: number;
+    duration?: number;
+    coords?: { x: number; y: number };
+    triggers?: {
+        onStart?: string[];
+        onComplete?: string[];
+    };
+}
+
+export interface InteractionMap {
+    events: InteractionEvent[];
+}
+
+export interface ComponentOverride {
+    id: string;
+    type: string;
+    content?: {
+        text?: string;
+        imageUrl?: string;
+        [key: string]: any;
+    };
+    style?: {
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+        color?: string;
+        backgroundColor?: string;
+        opacity?: number;
+        scale?: number;
+        zIndex?: number;
+        borderRadius?: number;
+        boxShadow?: string;
+        [key: string]: any;
+    };
+    entrance?: {
+        type?: 'fade' | 'slide' | 'pop';
+        delay?: number;
+        duration?: number;
+    };
+    [key: string]: any;
+}
+
+// ============================================
+// Vision-Powered Interactive Showcase Types
+// ============================================
+
+export interface UIElement {
+    id: string;
+    type: 'button' | 'input' | 'textarea' | 'card' | 'modal' | 'dropdown' | 'text' | 'image' | 'container' | 'header' | 'sidebar';
+    text?: string;
+    position: {
+        x: number; // Percentage 0-100
+        y: number; // Percentage 0-100
+        width?: number;
+        height?: number;
+    };
+    style: {
+        backgroundColor?: string;
+        color?: string;
+        fontSize?: number;
+        fontWeight?: number;
+        borderRadius?: number;
+        padding?: string;
+        [key: string]: any;
+    };
+}
+
+export interface UIAnalysis {
+    // Direct HTML/CSS from vision model (new approach)
+    html?: string;
+    css?: string;
+
+    layout: {
+        type: 'sidebar' | 'centered' | 'grid' | 'split' | 'header-content';
+        backgroundColor: string;
+        mainColor?: string;
+        accentColor?: string;
+    };
+    elements: UIElement[];
+    interactions: InteractionSuggestion[];
+    colorPalette?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+        text: string;
+    };
+    typography?: {
+        headingFont?: string;
+        bodyFont?: string;
+    };
+}
+
+export interface InteractionSuggestion {
+    step: number;
+    action: 'click' | 'hover' | 'type' | 'scroll';
+    targetId: string;
+    description: string;
+    stateChange?: {
+        type: 'modal-open' | 'modal-close' | 'dropdown-expand' | 'input-fill' | 'highlight' | 'navigate';
+        elementId?: string;
+        newHTML?: string;
+        value?: string;
+    };
+}
+
+export interface InteractionStep {
+    frame: number; // Absolute frame number when to trigger
+    action: 'click' | 'hover' | 'type' | 'scroll';
+    targetId: string;
+    description?: string;
+    cursorPath?: Array<{ x: number; y: number; frame: number }>; // Bezier path points
+    stateChange?: {
+        type: 'modal-open' | 'modal-close' | 'dropdown-expand' | 'input-fill' | 'highlight' | 'navigate';
+        elementId?: string;
+        newHTML?: string;
+        value?: string;
+    };
+    duration?: number; // Duration of the interaction in frames
+}
+
+export interface Subscene {
+    id: string;
+    duration: number; // In seconds
+    html: string; // Generated from vision or user-provided
+    css: string; // Scoped styles
+    interactions: InteractionStep[];
+    voiceoverScript?: string;
+    audioUrl?: string;
+    metadata?: {
+        screenshotUrl?: string; // Original screenshot for reference
+        analysisConfidence?: number; // 0-1 score from vision model
+    };
+}

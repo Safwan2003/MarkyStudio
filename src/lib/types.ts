@@ -1,4 +1,4 @@
-export type SceneType = 'hook' | 'intro' | 'problem' | 'solution' | 'showcase' | 'social_proof' | 'social-proof' | 'cta' | 'kinetic_typo' | 'device_showcase' | 'bento_grid' | 'isometric_illustration' | 'cta_finale' | 'slot_transition' | 'title_card' | 'image_full' | 'dashboard' | 'transition_how';
+export type SceneType = 'hook' | 'intro' | 'problem' | 'solution' | 'showcase' | 'interactive_showcase' | 'social_proof' | 'social-proof' | 'cta' | 'kinetic_typo' | 'device_showcase' | 'bento_grid' | 'isometric_illustration' | 'cta_finale' | 'slot_transition' | 'title_card' | 'image_full' | 'dashboard' | 'transition_how';
 
 export interface SceneConfig {
     layoutVariant?: "centered" | "split" | "offset" | "default";
@@ -39,6 +39,9 @@ export interface Scene {
     // director?: any; // REMOVED: Strict Mode
     // theme?: any;    // REMOVED: Strict Mode
     // bentoItems?: any[]; // REMAPPED to features
+
+    // Vision-powered interactive showcase (NEW)
+    subscenes?: Subscene[];
 }
 
 export interface VideoScript {
@@ -135,4 +138,97 @@ export interface ComponentOverride {
         duration?: number;
     };
     [key: string]: any;
+}
+
+// ============================================
+// Vision-Powered Interactive Showcase Types
+// ============================================
+
+export interface UIElement {
+    id: string;
+    type: 'button' | 'input' | 'textarea' | 'card' | 'modal' | 'dropdown' | 'text' | 'image' | 'container' | 'header' | 'sidebar';
+    text?: string;
+    position: {
+        x: number; // Percentage 0-100
+        y: number; // Percentage 0-100
+        width?: number;
+        height?: number;
+    };
+    style: {
+        backgroundColor?: string;
+        color?: string;
+        fontSize?: number;
+        fontWeight?: number;
+        borderRadius?: number;
+        padding?: string;
+        [key: string]: any;
+    };
+}
+
+export interface UIAnalysis {
+    // Direct HTML/CSS from vision model (new approach)
+    html?: string;
+    css?: string;
+
+    layout: {
+        type: 'sidebar' | 'centered' | 'grid' | 'split' | 'header-content';
+        backgroundColor: string;
+        mainColor?: string;
+        accentColor?: string;
+    };
+    elements: UIElement[];
+    interactions: InteractionSuggestion[];
+    colorPalette?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+        text: string;
+    };
+    typography?: {
+        headingFont?: string;
+        bodyFont?: string;
+    };
+}
+
+export interface InteractionSuggestion {
+    step: number;
+    action: 'click' | 'hover' | 'type' | 'scroll';
+    targetId: string;
+    description: string;
+    stateChange?: {
+        type: 'modal-open' | 'modal-close' | 'dropdown-expand' | 'input-fill' | 'highlight' | 'navigate';
+        elementId?: string;
+        newHTML?: string;
+        value?: string;
+    };
+}
+
+export interface InteractionStep {
+    frame: number; // Absolute frame number when to trigger
+    action: 'click' | 'hover' | 'type' | 'scroll';
+    targetId: string;
+    description?: string;
+    cursorPath?: Array<{ x: number; y: number; frame: number }>; // Bezier path points
+    stateChange?: {
+        type: 'modal-open' | 'modal-close' | 'dropdown-expand' | 'input-fill' | 'highlight' | 'navigate';
+        elementId?: string;
+        newHTML?: string;
+        value?: string;
+    };
+    duration?: number; // Duration of the interaction in frames
+}
+
+export interface Subscene {
+    id: string;
+    duration: number; // In seconds
+    html: string; // Generated from vision or user-provided
+    css: string; // Scoped styles
+    interactions: InteractionStep[];
+    voiceoverScript?: string;
+    audioUrl?: string;
+    metadata?: {
+        screenshotUrl?: string; // Original screenshot for reference
+        analysisConfidence?: number; // 0-1 score from vision model
+    };
 }

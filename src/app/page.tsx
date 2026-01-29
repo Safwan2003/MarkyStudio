@@ -8,9 +8,11 @@ import { ViableTemplate } from "@/remotion/templates/Viable";
 import { JustCallTemplate } from "@/remotion/templates/JustCall";
 import { DesklogTemplate } from "@/remotion/templates/Desklog";
 import { FronterTemplate } from "@/remotion/templates/Fronter";
-import { generateVideoScript, generateVideoAudio, TemplateType } from "./actions";
-import { VideoScript } from "@/lib/types";
+import { generateVideoScript, generateVideoAudio, analyzeScreenshotsAndCreateSubscenes, TemplateType } from "./actions";
+import { VideoScript, Subscene } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScreenshotUploader } from "@/components/ScreenshotUploader";
+import { SubscenePreview } from "@/components/SubscenePreview";
 
 // Default placeholder script for Fronter
 const DEFAULT_SCRIPT: VideoScript = {
@@ -112,11 +114,15 @@ export default function Home() {
   const [prompt, setPrompt] = useState("Fronter is an AI-powered operating system for modern creative agencies. It centralizes feedback, project management, and asset delivery into one sleek dashboard. It eliminates 'feedback loop chaos' and helps teams stay coordinated.");
   const [productUrl, setProductUrl] = useState("https://fronter.ai/");
   const [currentStep, setCurrentStep] = useState(0);
-  const [wizardStep, setWizardStep] = useState<'aesthetic' | 'content'>('aesthetic'); // Start at aesthetic for quick preview
-
+  const [wizardStep, setWizardStep] = useState<'aesthetic' | 'screenshots' | 'prompt'>('aesthetic');
   const [script, setScript] = useState<VideoScript>(DEFAULT_SCRIPT);
   const [status, setStatus] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('Fronter');
+  const [loading, setLoading] = useState(false);
+  const [uploadedScreenshots, setUploadedScreenshots] = useState<File[]>([]);
+  const [screenshotUrls, setScreenshotUrls] = useState<string[]>([]);
+  const [generatedSubscenes, setGeneratedSubscenes] = useState<Subscene[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   const playerRef = useRef<PlayerRef>(null);
 
@@ -168,7 +174,7 @@ export default function Home() {
       <main className="relative z-10 max-w-7xl mx-auto p-6 mt-6 box-border">
 
         {currentStep === 0 && (
-          <div className="max-w-4xl mx-auto">
+          <div className={`mx-auto transition-all duration-500 ${wizardStep === 'screenshots' ? 'max-w-7xl' : 'max-w-5xl'}`}>
             <AnimatePresence mode="wait">
               {wizardStep === 'aesthetic' && (
                 <motion.div
@@ -237,8 +243,137 @@ export default function Home() {
                     </div>
                   </div>
 
+                  <div className="flex justify-center pt-4 gap-4">
+                    <button
+                      onClick={() => setWizardStep('screenshots')}
+                      className="px-8 py-3 bg-white text-black rounded-lg font-bold hover:bg-gray-100 transition"
+                    >
+                      Add Interactive Showcase →
+                    </button>
+                    <button
+                      onClick={() => setCurrentStep(2)}
+                      className="px-8 py-3 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-600 transition"
+                    >
+                      Skip to Preview →
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {wizardStep === 'screenshots' && (
+                <motion.div
+                  key="screenshots"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-8"
+                >
+                  <div className="text-center space-y-2">
+                    <button
+                      onClick={() => setWizardStep('aesthetic')}
+                      className="text-sm text-gray-400 hover:text-white mb-4 inline-flex items-center gap-2"
+                    >
+                      ← Back to Templates
+                    </button>
+                    <h2 className="text-3xl font-bold">Upload Product Screenshots</h2>
+                    <p className="text-gray-400 max-w-2xl mx-auto">
+                      Upload screenshots of your digital product UI. Our AI will analyze them and create
+                      an interactive demonstration with cursor animations.
+                    </p>
+                  </div>
+
+                  <div className="max-w-3xl mx-auto bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <ScreenshotUploader
+                      maxFiles={5}
+                      onUploadComplete={async (files) => {
+                        setUploadedScreenshots(files);
+                        setLoading(true);
+
+                        try {
+                          // Create FormData for server action
+                          const formData = new FormData();
+                          files.forEach((file, index) => {
+                            formData.append(`screenshot-${index}`, file);
+                          });
+
+                          // Analyze screenshots and generate subscenes
+                          const subscenes = await analyzeScreenshotsAndCreateSubscenes(formData);
+                          setGeneratedSubscenes(subscenes);
+
+                          // Create screenshot URLs for preview
+                          const urls = files.map(file => URL.createObjectURL(file));
+                          setScreenshotUrls(urls);
+
+                          // Show preview instead of immediately adding to video
+                          setShowPreview(true);
+
+                        } catch (error) {
+                          console.error('Screenshot analysis failed:', error);
+                          alert('Failed to analyze screenshots. Please try again.');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {loading && (
+                    <div className="text-center space-y-3">
+                      <div className="inline-block w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                      <p className="text-sm text-gray-400">Analyzing screenshots with Llama 4 Scout Vision...</p>
+                    </div>
+                  )}
+
+                  {/* Preview Generated Subscenes */}
+                  {showPreview && generatedSubscenes.length > 0 && (
+                    <div className="mt-8">
+                      <SubscenePreview
+                        subscenes={generatedSubscenes}
+                        originalScreenshots={screenshotUrls}
+                        onApprove={() => {
+                          // Create a new interactive_showcase scene
+                          const showcaseScene = {
+                            id: `showcase-${Date.now()}`,
+                            type: 'interactive_showcase' as const,
+                            mainText: 'Interactive Product Demo',
+                            subText: 'See it in action',
+                            voiceoverScript: `Watch how our product works through this interactive demonstration.`,
+                            duration: generatedSubscenes.reduce((acc, sub) => acc + sub.duration, 0),
+                            subscenes: generatedSubscenes
+                          };
+
+                          // Insert showcase scene after solution, before CTA
+                          const updatedScript = { ...script };
+                          const insertIndex = updatedScript.scenes.findIndex(s => s.type === 'cta');
+                          updatedScript.scenes.splice(
+                            insertIndex > -1 ? insertIndex : updatedScript.scenes.length,
+                            0,
+                            showcaseScene
+                          );
+
+                          setScript(updatedScript);
+
+                          alert(`✅ Created interactive showcase with ${generatedSubscenes.length} subscenes!`);
+                          setCurrentStep(2); // Go to preview
+                        }}
+                        onReject={() => {
+                          // Reset and allow re-upload
+                          setShowPreview(false);
+                          setGeneratedSubscenes([]);
+                          setUploadedScreenshots([]);
+                          setScreenshotUrls([]);
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <div className="flex justify-center pt-4">
-                    <button onClick={() => setCurrentStep(2)} className="px-8 py-3 bg-white text-black rounded-lg font-bold">Quick Preview &rarr;</button>
+                    <button
+                      onClick={() => setCurrentStep(2)}
+                      className="px-8 py-3 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-600 transition"
+                    >
+                      Skip to Preview →
+                    </button>
                   </div>
                 </motion.div>
               )}

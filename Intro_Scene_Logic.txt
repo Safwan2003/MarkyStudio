@@ -1,0 +1,314 @@
+import React from 'react';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate, Img, staticFile } from 'remotion';
+import { Scene, ThemeStyles } from '@/lib/types';
+import { BrandIcons } from '../components/BrandIcons';
+import { ChatBubble } from '../components/ChatBubble';
+import { NoiseOverlay } from '../components/NoiseOverlay';
+
+export const Intro: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ scene, themeStyles }) => {
+    const frame = useCurrentFrame();
+    const { fps, width, height } = useVideoConfig();
+
+    const mainText = scene.mainText || "Mockups connects the conceptual structure";
+
+    // Camera Movement (Slow Dolly In) - Cinematically scales both bg and content
+    // Zoom range: 1.0 -> 1.05 (subtle, professional)
+    const cameraZoom = interpolate(frame, [0, 120], [1, 1.05], { extrapolateRight: 'clamp' });
+
+    // Floating App Icons Configuration (Matches Reference Layout - ENHANCED VISIBILITY)
+    const floatingIcons = [
+        // Top Left Cluster
+        { 
+            Icon: BrandIcons.Avatar2, x: 0.15, y: 0.20, delay: 30, size: 140, 
+            hasBadge: true, badge: <BrandIcons.Envelope width={16} height={16} /> 
+        },
+        { 
+            Icon: BrandIcons.Mail, x: 0.22, y: 0.35, delay: 35, size: 100, 
+            hasBadge: true, badge: '50' 
+        },
+
+        // Top Right Cluster
+        { Icon: BrandIcons.Dropbox, x: 0.82, y: 0.18, delay: 40, size: 110, hasBadge: false },
+        { Icon: BrandIcons.Skype, x: 0.60, y: 0.12, delay: 45, size: 90, hasBadge: false },
+        { Icon: BrandIcons.TeamViewer, x: 0.55, y: 0.15, delay: 43, size: 85, hasBadge: false }, // Added TeamViewer matches reference
+
+        // Bottom Left Cluster
+        { 
+            Icon: BrandIcons.WhatsApp, x: 0.12, y: 0.55, delay: 50, size: 120, 
+            hasBadge: true, badge: '33' 
+        },
+        { Icon: BrandIcons.PDF, x: 0.28, y: 0.82, delay: 55, size: 90, hasBadge: false },
+
+        // Bottom Right Cluster
+        { 
+            Icon: BrandIcons.Avatar1, x: 0.85, y: 0.70, delay: 60, size: 150, 
+            hasBadge: true, badge: <BrandIcons.Phone width={16} height={16} />
+        },
+        { Icon: BrandIcons.Slack, x: 0.75, y: 0.55, delay: 65, size: 85, hasBadge: false },
+
+        // Misc
+        { Icon: BrandIcons.Google, x: 0.50, y: 0.85, delay: 70, size: 85, hasBadge: false },
+    ];
+
+    // Chat Messages
+    const chatMessages = [
+        {
+            text: "Please change the header of image of the product page to the image I sent you by email!",
+            x: 0.25, y: 0.65, delay: 80, variant: 'green', direction: 'left',
+            Avatar: BrandIcons.Avatar2,
+            timestamp: "16:40"
+        },
+        {
+            text: "Can you increase the font of the second paragraph on the features page?",
+            x: 0.70, y: 0.35, delay: 90, variant: 'blue', direction: 'right',
+            Avatar: BrandIcons.Avatar1,
+            timestamp: "16:42"
+        }
+    ];
+
+    return (
+        <AbsoluteFill style={{ backgroundColor: '#000', overflow: 'hidden' }}>
+
+            {/* 1. Base Layer: Cinematic Background Image (Blank Screen Laptop) */}
+            <AbsoluteFill style={{
+                zIndex: 0,
+                transform: `scale(${cameraZoom})`,
+                transformOrigin: 'center center',
+            }}>
+                <Img
+                    src={staticFile('/fronter_intro_laptop.jpg')}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                    }}
+                />
+            </AbsoluteFill>
+
+            {/* 2. Screen Content Overlay (Perspective Transformed - MATCHED TO Problem.tsx) */}
+            <AbsoluteFill style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 5,
+                transform: `scale(${cameraZoom})`,
+                transformOrigin: 'center 45%', // Matched to Problem.tsx
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: '29.9%',
+                    left: '31.1%',
+                    width: '37.8%',
+                    height: '40.4%',
+                    transform: 'perspective(1500px) rotateX(1.5deg) rotateY(-0.5deg) rotateZ(-0.4deg)',
+                    borderRadius: '2px',
+                    overflow: 'hidden',
+                    backgroundColor: '#0f172a',
+                    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.6), inset 0 0 2px rgba(0,0,0,0.8)',
+                    opacity: interpolate(frame, [0, 10], [0, 1]),
+                }}>
+
+                    {/* Inner Screen Content - "Mockups" Website */}
+                    <div style={{
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: '#ffffff',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        position: 'relative' // For glare
+                    }}>
+
+                        {/* Navbar */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '3% 6%',
+                            height: '15%'
+                        }}>
+                            {/* Logo */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 14, height: 14, borderRadius: '50%', border: '3px solid #1e293b' }} />
+                                <span style={{ fontSize: 8, fontWeight: 700, color: '#1e293b' }}>Company</span>
+                            </div>
+
+                            {/* Nav Links */}
+                            <div style={{ display: 'flex', gap: 15, alignItems: 'center' }}>
+                                {['Features', 'Pricing', 'Blog', 'Help Center'].map((t, i) => (
+                                    <span key={i} style={{ fontSize: 6, color: '#64748b', fontWeight: 500 }}>{t}</span>
+                                ))}
+                                <div style={{ padding: '4px 10px', background: '#4f46e5', borderRadius: 4, color: 'white', fontSize: 6, fontWeight: 600 }}>
+                                    Get Started
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hero Section */}
+                        <div style={{
+                            padding: '0 6%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            height: '85%'
+                        }}>
+                            {/* Text Content */}
+                            <div style={{ flex: 1, paddingRight: '5%' }}>
+                                <h1 style={{
+                                    fontFamily: themeStyles.headingFont,
+                                    fontSize: 18,
+                                    fontWeight: 800,
+                                    color: '#0f172a',
+                                    lineHeight: 1.1,
+                                    marginBottom: 10,
+                                    letterSpacing: '-0.02em'
+                                }}>
+                                    Mockups connects the <br /> conceptual structure
+                                </h1>
+                                <p style={{
+                                    fontSize: 6,
+                                    color: '#64748b',
+                                    lineHeight: 1.5,
+                                    marginBottom: 15,
+                                    maxWidth: '80%'
+                                }}>
+                                    Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.
+                                </p>
+                                <div style={{ padding: '6px 14px', background: '#4f46e5', borderRadius: 4, color: 'white', fontSize: 7, fontWeight: 600, width: 'fit-content', boxShadow: '0 4px 6px rgba(79, 70, 229, 0.2)' }}>
+                                    Get Started
+                                </div>
+                            </div>
+
+                            {/* Hero Image (Phone + Dashboard) */}
+                            <div style={{ width: '45%', height: '80%', position: 'relative' }}>
+                                {/* Dark Dashboard Back Layer */}
+                                <div style={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: 0,
+                                    width: '90%',
+                                    height: '90%',
+                                    backgroundColor: '#000000',
+                                    borderRadius: 4,
+                                    border: '1px solid #333'
+                                }} />
+                                {/* Phone Front Layer */}
+                                <div style={{
+                                    position: 'absolute',
+                                    left: 0,
+                                    bottom: 0,
+                                    width: '35%',
+                                    height: '90%',
+                                    backgroundColor: '#1e293b',
+                                    borderRadius: 8,
+                                    border: '2px solid #334155',
+                                    boxShadow: '0 10px 20px rgba(0,0,0,0.3)'
+                                }} />
+                            </div>
+                        </div>
+
+                        {/* Realistic Screen Glare Overlay */}
+                        <div style={{
+                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                            background: 'linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 65%)',
+                            pointerEvents: 'none', zIndex: 10, mixBlendMode: 'overlay'
+                        }} />
+
+                    </div>
+                </div>
+            </AbsoluteFill>
+
+            {/* 3. Overlays Layer (Icons & Chat) */}
+            <AbsoluteFill style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                perspective: '2000px',
+                zIndex: 10,
+                transform: `scale(${cameraZoom})`,
+                transformOrigin: 'center center'
+            }}>
+                <NoiseOverlay opacity={0.05} />
+
+                {/* Floating Icons */}
+                {floatingIcons.map((item, i) => {
+                    if (frame < item.delay) return null;
+
+                    const pop = spring({
+                        frame: frame - item.delay,
+                        fps,
+                        // Smoother, bouncier spring
+                        config: { damping: 12, stiffness: 180, mass: 1.2 }
+                    });
+
+                    // Enhanced Floating Parallax
+                    const floatY = Math.sin((frame - item.delay) / 45 + i) * 15;
+                    const floatX = Math.cos((frame - item.delay) / 60 + i) * 8;
+                    // Scale parallax based on simulated Z-depth
+                    const zScale = 1 + (Math.sin(i * 1324) * 0.1);
+
+                    return (
+                        <div key={i} style={{
+                            position: 'absolute',
+                            left: width * item.x + floatX,
+                            top: height * item.y + floatY,
+                            transform: `scale(${pop * zScale})`,
+                            width: item.size,
+                            height: item.size,
+                            backgroundColor: 'white',
+                            borderRadius: '50%',
+                            boxShadow: '0 30px 60px rgba(0,0,0,0.35), 0 10px 20px rgba(0,0,0,0.2)', // Deep, soft cinematic shadows
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: item.size * 0.2,
+                            zIndex: 30 + i,
+                            border: '3px solid rgba(255,255,255,0.95)' // Crisper, ticker border
+                        }}>
+                            <item.Icon width="100%" height="100%" />
+                            {item.hasBadge && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: -4,
+                                    right: -4,
+                                    minWidth: 32,
+                                    height: 32,
+                                    backgroundColor: (typeof item.badge === 'string' && item.badge.length <= 2) ? '#ef4444' : '#10B981', // Green for icon badges, Red for numbers (generic rule)
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    border: '3px solid white',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    fontSize: 14,
+                                    fontWeight: 700,
+                                    padding: '0 6px',
+                                    boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                                }}>
+                                    {item.badge}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+
+                {/* Chat Bubbles */}
+                {chatMessages.map((msg, i) => (
+                    <ChatBubble
+                        key={i}
+                        //@ts-ignore
+                        x={width * msg.x}
+                        y={height * msg.y}
+                        delay={msg.delay}
+                        text={msg.text}
+                        //@ts-ignore
+                        variant={msg.variant}
+                        avatar={<msg.Avatar width="80%" height="80%" />}
+                        //@ts-ignore
+                        direction={msg.direction}
+                        scale={1.1} // Slightly larger for impact
+                        timestamp={msg.timestamp}
+                    />
+                ))}
+
+            </AbsoluteFill>
+        </AbsoluteFill>
+    );
+};

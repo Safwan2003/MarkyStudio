@@ -2,7 +2,13 @@
 
 import { groq } from "@/lib/groq";
 import { generateAudio } from "@/lib/tts";
-import { VideoScript } from "@/lib/types";
+import { VideoScript, Subscene, InteractionStep } from "@/lib/types";
+import { analyzeScreenshotSequence } from "@/lib/vision";
+import { generateHTML, generateCSS } from "@/lib/html-generator";
+import fs from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
+import getMP3Duration from "get-mp3-duration";
 
 export type TemplateType = 'Pretaa' | 'Viable' | 'JustCall' | 'Desklog' | 'Fronter';
 
@@ -100,10 +106,6 @@ export async function generateVideoScript(prompt: string, template: TemplateType
   return JSON.parse(content) as VideoScript;
 }
 
-import fs from "fs";
-import path from "path";
-import getMP3Duration from "get-mp3-duration";
-
 export async function generateVideoAudio(script: VideoScript, template: TemplateType = 'Pretaa'): Promise<VideoScript> {
   // Voice Selection logic
   const voice = template === 'JustCall'
@@ -153,3 +155,118 @@ export async function generateVideoAudio(script: VideoScript, template: Template
 
   return { ...script, scenes: updatedScenes as any };
 }
+
+/**
+ * Analyzes uploaded screenshots and generates interactive subscenes
+ * @param formData - FormData with uploaded screenshot files
+ * @returns Array of subscenes with HTML/CSS and interaction timelines
+ */
+export async function analyzeScreenshotsAndCreateSubscenes(formData: FormData): Promise<Subscene[]> {
+  try {
+    console.log('[Screenshot Upload] Processing uploaded screenshots...');
+
+    // 1. Extract files from FormData
+    const files: File[] = [];
+    const entries = Array.from(formData.entries());
+    for (const [key, value] of entries) {
+      if (key.startsWith('screenshot-') && value instanceof File) {
+        files.push(value);
+      }
+    }
+
+    if (files.length === 0) {
+      throw new Error('No screenshot files found in upload');
+    }
+
+    console.log(`[Screenshot Upload] Found ${files.length} files`);
+
+    // 2. Save files to temporary directory
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const savedPaths: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = path.extname(file.name) || '.png';
+      const filename = `${randomUUID()}${ext}`;
+      const filePath = path.join(uploadDir, filename);
+
+      // Convert File to Buffer and save
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      fs.writeFileSync(filePath, buffer as any as Uint8Array);
+
+      savedPaths.push(filePath);
+      console.log(`[Screenshot Upload] Saved file ${i + 1}/${files.length}: ${filename}`);
+    }
+
+    // 3. Analyze screenshots using Vision LLM
+    console.log('[Vision Analysis] Starting batch analysis...');
+    const analyses = await analyzeScreenshotSequence(savedPaths);
+
+    // 4. Generate subscenes from analyses
+    const subscenes: Subscene[] = analyses.map((analysis, index) => {
+      const html = generateHTML(analysis);
+      const css = generateCSS(analysis);
+
+      // Convert interaction suggestions to timed steps
+      const fps = 30;
+      const subsceneDuration = 5; // Default 5 seconds per subscene
+      const interactionSteps: InteractionStep[] = [];
+
+      // Allocate time evenly across interactions
+      const framesPerInteraction = Math.floor((subsceneDuration * fps) / Math.max(analysis.interactions.length, 1));
+
+      analysis.interactions.forEach((suggestion, idx) => {
+        const startFrame = idx * framesPerInteraction;
+
+        // Find target element position for cursor path
+        const targetElement = analysis.elements.find(el => el.id === suggestion.targetId);
+        const hasPosition = targetElement && targetElement.position;
+
+        const cursorPath = hasPosition ? [
+          { x: 50, y: 90, frame: startFrame },                  // Start from bottom center
+          {
+            x: targetElement?.position?.x ?? 50,
+            y: targetElement?.position?.y ?? 50,
+            frame: startFrame + framesPerInteraction - 10
+          }
+        ] : undefined;
+
+        interactionSteps.push({
+          frame: startFrame,
+          action: suggestion.action,
+          targetId: suggestion.targetId,
+          description: suggestion.description,
+          cursorPath,
+          stateChange: suggestion.stateChange,
+          duration: framesPerInteraction
+        });
+      });
+
+      return {
+        id: `subscene-${index + 1}`,
+        duration: subsceneDuration,
+        html,
+        css,
+        interactions: interactionSteps,
+        voiceoverScript: `In this step, ${analysis.interactions.map(i => i.description).join(', then ')}`,
+        metadata: {
+          screenshotUrl: `/uploads/${path.basename(savedPaths[index])}`,
+          analysisConfidence: 0.85 // Placeholder
+        }
+      };
+    });
+
+    console.log(`[Subscene Generation] Created ${subscenes.length} subscenes`);
+
+    return subscenes;
+
+  } catch (error) {
+    console.error('[Screenshot Upload] Failed:', error);
+    throw new Error(`Screenshot processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+

@@ -1,213 +1,287 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  useCurrentFrame,
-  useVideoConfig,
-  spring,
-  interpolate,
-  Img,
-  staticFile,
-} from 'remotion';
-import { Mail, Phone, Zap } from 'lucide-react';
-import { Scene } from '@/lib/types';
-import { ThemeStyles } from '../components/ThemeEngine';
+import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
+import { Scene, ThemeStyles } from '@/lib/types';
+import { BrandIcons } from '../components/BrandIcons';
 
-// Note: Ensure images are in public/fronter/ or use absolute paths if configured
-const INTRO_BG = "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1920&q=80"; // High-res fallback
-// We will assume the local image is available via staticFile if copied to public, 
-// but for this implementation we'll use a placeholder that looks like a desk if not found.
+// Floating Icons Data
+const FLOATING_ICONS = [
+    // Left side
+    { Icon: BrandIcons.AvatarWoman, x: 0.15, y: 0.25, delay: 10, size: 160, hasBadge: true, badgeIcon: '✉️', badgeColor: '#ff6b35' },
+    { Icon: BrandIcons.WhatsApp, x: 0.18, y: 0.55, delay: 15, size: 130, hasBadge: true, badgeIcon: '50', badgeColor: '#25d366' },
+    { Icon: BrandIcons.Gmail, x: 0.32, y: 0.40, delay: 20, size: 100, hasBadge: false },
 
-const AVATARS = [
-  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop',
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop',
-  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop',
+    // Top center
+    { Icon: BrandIcons.Skype, x: 0.42, y: 0.27, delay: 25, size: 95, hasBadge: false },
+    { Icon: BrandIcons.Discord, x: 0.60, y: 0.18, delay: 30, size: 80, hasBadge: false },
+
+    // Right side
+    { Icon: BrandIcons.Dropbox, x: 0.78, y: 0.28, delay: 35, size: 85, hasBadge: false },
+    { Icon: BrandIcons.Avatar2, x: 0.82, y: 0.72, delay: 40, size: 160, hasBadge: true, badgeIcon: '📞', badgeColor: '#10b981' },
+
+    // Bottom
+    { Icon: BrandIcons.Google, x: 0.45, y: 0.85, delay: 45, size: 75, hasBadge: false },
+    { Icon: BrandIcons.TeamViewer, x: 0.60, y: 0.75, delay: 50, size: 60, hasBadge: false },
+    { Icon: BrandIcons.Slack, x: 0.63, y: 0.6, delay: 55, size: 65, hasBadge: false },
 ];
 
-const FloatingIcon = ({ Icon, x, y, delay, color, badge }: { Icon: any, x: number, y: number, delay: number, color: string, badge?: string }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const pop = spring({ frame: frame - delay, fps, config: { stiffness: 100, damping: 14 } });
-  const float = Math.sin((frame + delay) / 35) * 12;
+// Chat Bubbles Data
+const CHAT_MESSAGES = [
+    {
+        text: 'Please change the header of image\nof the product page to the image\nI sent you by email!',
+        x: 0.26, y: 0.70, delay: 60, variant: 'green', timestamp: '18:42'
+    },
+    {
+        text: 'Can you increase the font of the\nsecond paragraph on the features\npage?',
+        x: 0.70, y: 0.40, delay: 65, variant: 'blue', timestamp: '18:42'
+    },
+];
 
-  if (frame < delay) return null;
-
-  return (
-    <div style={{
-      position: 'absolute',
-      left: x, top: y,
-      transform: `scale(${pop}) translateY(${float}px)`,
-      width: 90, height: 90,
-      background: 'white',
-      borderRadius: 24,
-      display: 'flex', justifyContent: 'center', alignItems: 'center',
-      boxShadow: '0 12px 25px rgba(0,0,0,0.1)',
-      zIndex: 45
-    }}>
-      <Icon size={50} color={color} fill={color + '33'} />
-      {badge && (
-        <div style={{
-          position: 'absolute', top: -10, right: -10,
-          background: '#ef4444', color: 'white',
-          fontSize: 18, fontWeight: 900,
-          width: 36, height: 36, borderRadius: '50%',
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-          border: '4px solid white',
-          boxShadow: '0 5px 15px rgba(239, 68, 68, 0.4)'
+export const Intro: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ themeStyles }) => {
+    const frame = useCurrentFrame();
+    const { fps } = useVideoConfig();
+    return (
+        <AbsoluteFill style={{
+            backgroundColor: 'black',
         }}>
-          {badge}
-        </div>
-      )}
-    </div>
-  );
-};
+            {/* Background Image */}
+            <Img
+                src={staticFile('/fronter_intro_laptop.jpg')}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                }}
+            />
 
-const GlassBubble = ({ text, subtext, x, y, delay, color, direction = 'left' }: { text: string, subtext?: string, x: number, y: number, delay: number, color: string, direction?: 'left' | 'right' }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const pop = spring({ frame: frame - delay, fps, config: { stiffness: 80, damping: 12 } });
-  const float = Math.sin((frame + delay * 2) / 40) * 8;
+            {/* Screen Overlay Container - Fitted to Laptop Screen */}
+            <div style={{
+                position: 'absolute',
+                top: '34.5%',
+                left: '34.5%',
+                width: '27.5%',
+                height: '30%',
+                transform: '',
+                borderRadius: '5px', // Slight radius for realism
+                overflow: 'hidden',
+                backgroundColor: '#ffffff', // Screen base color
+                boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)', // Inner shadow for depth
+            }}>
+                {/* Website Content - Matched to Reference */}
+                <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '6% 8%', // Adjusted padding for the perspective
+                    fontFamily: themeStyles.bodyFont,
+                    backgroundColor: '#ffffff'
+                }}>
+                    {/* Navbar */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#6366f1' }} />
+                            <span style={{ fontSize: 9, fontWeight: 700, color: '#0f172a' }}>Company</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                            <span style={{ fontSize: 6, fontWeight: 600, color: '#64748b' }}>Features</span>
+                            <span style={{ fontSize: 6, fontWeight: 600, color: '#64748b' }}>Pricing</span>
+                            <div style={{ padding: '3px 8px', background: '#4f46e5', borderRadius: 3, color: 'white', fontSize: 6, fontWeight: 600 }}>Sign Up</div>
+                        </div>
+                    </div>
 
-  if (frame < delay) return null;
+                    {/* Hero Section */}
 
-  return (
-    <div style={{
-      position: 'absolute',
-      left: x, top: y,
-      transform: `scale(${pop}) translateY(${float}px)`,
-      background: '#fff',
-      backdropFilter: 'blur(16px)',
-      padding: '24px 32px',
-      borderRadius: direction === 'left' ? '0 32px 32px 32px' : '32px 0 32px 32px',
-      boxShadow: '0 30px 60px -12px rgba(0,0,0,0.15)',
-      border: '1px solid rgba(255,255,255,0.8)',
-      maxWidth: 420,
-      zIndex: 60
-    }}>
-      <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#1e293b', lineHeight: 1.3 }}>{text}</p>
-      {subtext && <p style={{ margin: '8px 0 0', fontSize: 16, fontWeight: 600, color: '#64748b', textAlign: 'right' }}>{subtext}</p>}
-    </div>
-  );
-};
+                    <h1 style={{
+                        fontSize: 18, fontWeight: 800, color: '#0f172a', lineHeight: 1.1, marginBottom: 8,
+                        fontFamily: themeStyles.headingFont, width: '70%', letterSpacing: '-0.02em'
+                    }}>
+                        Mockups connects the conceptual structure
+                    </h1>
+                    <p style={{ fontSize: 6, color: '#64748b', maxWidth: '60%', lineHeight: 1.5, marginBottom: 12 }}>
+                        For the quick brown fox jumps over the lazy dog. This text is a placeholder.
+                    </p>
 
-const FloatingAvatar = ({ src, x, y, delay }: { src: string, x: number, y: number, delay: number }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const pop = spring({ frame: frame - delay, fps, config: { stiffness: 120, damping: 14 } });
-  const float = Math.cos((frame + delay) / 40) * 15;
+                    <div style={{
+                        padding: '5px 12px', background: '#4f46e5', borderRadius: 4,
+                        color: 'white', fontSize: 7, fontWeight: 600, width: 'fit-content',
+                        boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.3)'
+                    }}>
+                        Read More
+                    </div>
 
-  if (frame < delay) return null;
+                    {/* Mobile Mockup Preview (Bottom Right) */}
+                    <div style={{
+                        position: 'absolute',
+                        right: '8%', bottom: '-10%',
+                        width: '35%', height: '70%',
+                        background: '#0f172a',
+                        borderRadius: '8px',
+                        border: '2px solid #1e293b',
+                        boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+                        transform: 'rotate(-5deg)',
+                        overflow: 'hidden'
+                    }}>
+                        {/* Content inside phone */}
+                        <div style={{ width: '100%', height: '10%', background: '#1e293b', borderBottom: '1px solid #334155' }} />
+                        <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <div style={{ width: '60%', height: 4, background: '#334155', borderRadius: 2 }} />
+                            <div style={{ width: '80%', height: 4, background: '#334155', borderRadius: 2 }} />
+                        </div>
+                    </div>
 
-  return (
-    <div style={{
-      position: 'absolute',
-      left: x, top: y,
-      transform: `scale(${pop}) translateY(${float}px)`,
-      width: 100, height: 100,
-      borderRadius: '50%',
-      border: '6px solid white',
-      boxShadow: '0 15px 30px rgba(0,0,0,0.2)',
-      overflow: 'hidden',
-      zIndex: 40
-    }}>
-      <Img src={src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-    </div>
-  );
-};
+                </div>
 
-const ColorSquare = ({ x, y, size, color, delay }: { x: number, y: number, size: number, color: string, delay: number }) => {
-  const frame = useCurrentFrame();
-  const pop = spring({ frame: frame - delay, fps: 30 });
-  const float = Math.sin((frame + delay) / 50) * 20;
+                {/* Glare/Reflection Overlay for Realism */}
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(120deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 60%)',
+                    pointerEvents: 'none'
+                }} />
+            </div>
 
-  return (
-    <div style={{
-      position: 'absolute', left: x, top: y,
-      width: size, height: size,
-      background: color, borderRadius: size * 0.2,
-      transform: `scale(${pop}) translateY(${float}px) rotate(${float}deg)`,
-      opacity: 0.8,
-      zIndex: 10
-    }} />
-  );
-};
+            {/* Floating Icons Layer */}
+            {FLOATING_ICONS.map((item, i) => {
+                if (frame < item.delay) return null;
 
-export const Intro: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ scene, themeStyles }) => {
-  const frame = useCurrentFrame();
-  const { fps, width, height } = useVideoConfig();
+                const progress = spring({
+                    frame: frame - item.delay,
+                    fps,
+                    config: { stiffness: 100, damping: 15 }
+                });
 
-  // Cinematic drivers
-  const zoom = interpolate(frame, [0, 60, 120], [1, 1.1, 1.8], { extrapolateRight: 'clamp' });
-  const blur = interpolate(frame, [90, 120], [0, 12], { extrapolateRight: 'clamp' });
-  const opacity = interpolate(frame, [100, 120], [1, 0], { extrapolateRight: 'clamp' });
+                const scale = interpolate(progress, [0, 1], [0, 1]);
+                const opacity = interpolate(progress, [0, 0.5], [0, 1]);
 
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#fff', overflow: 'hidden' }}>
+                // Floating animation
+                const floatY = Math.sin((frame - item.delay) / 30) * 10;
+                const floatX = Math.cos((frame - item.delay) / 40) * 5;
 
-      <AbsoluteFill style={{ transform: `scale(${zoom})`, filter: `blur(${blur}px)`, opacity }}>
-        <Img
-          src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1920&q=80"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      </AbsoluteFill>
+                return (
+                    <div
+                        key={i}
+                        style={{
+                            position: 'absolute',
+                            left: `${item.x * 100}%`,
+                            top: `${item.y * 100}%`,
+                            transform: `translate(-50%, -50%) translate(${floatX}px, ${floatY}px) scale(${scale})`,
+                            opacity,
+                            zIndex: 10 + i
+                        }}
+                    >
+                        {/* Icon Container */}
+                        <div style={{
+                            width: item.size,
+                            height: item.size,
+                            borderRadius: '50%',
+                            background: 'white',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: 12,
+                            position: 'relative'
+                        }}>
+                            <item.Icon width="100%" height="100%" />
 
-      {/* ACT 2: FLOATING NOISE (AGENCY CHAOS) */}
-      <AbsoluteFill style={{ opacity }}>
-        {/* Decorative Squares */}
-        <ColorSquare x={200} y={100} size={50} color="#fbbf24" delay={5} />
-        <ColorSquare x={1700} y={150} size={40} color="#60a5fa" delay={15} />
-        <ColorSquare x={300} y={800} size={60} color="#34d399" delay={25} />
+                            {/* Notification Badge */}
+                            {item.hasBadge && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: -5,
+                                    right: -5,
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: '50%',
+                                    background: item.badgeColor,
+                                    border: '3px solid white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: 12,
+                                    fontWeight: 700,
+                                    color: 'white',
+                                    boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                                }}>
+                                    {item.badgeIcon}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            })}
 
-        <FloatingAvatar src={AVATARS[0]} x={250} y={250} delay={10} />
-        <FloatingAvatar src={AVATARS[1]} x={1550} y={650} delay={35} />
+            {/* Chat Bubbles Layer */}
+            {CHAT_MESSAGES.map((msg, i) => {
+                if (frame < msg.delay) return null;
 
-        <GlassBubble
-          text="Can you increase the font of the second paragraph on the features page?"
-          subtext="v2 requested"
-          x={1100} y={280} delay={20} color="#3b82f6" direction="right"
-        />
-        <GlassBubble
-          text="Please change the header of image of the product page to the image I sent you by email!"
-          subtext="16:40"
-          x={220} y={580} delay={45} color="#ef4444"
-        />
+                const progress = spring({
+                    frame: frame - msg.delay,
+                    fps,
+                    config: { stiffness: 120, damping: 14 }
+                });
 
-        <FloatingIcon Icon={Mail} x={500} y={350} delay={15} color="#ea4335" badge="5" />
-        <FloatingIcon Icon={Phone} x={1650} y={750} delay={30} color="#22c55e" />
-        <FloatingIcon Icon={Zap} x={1000} y={150} delay={40} color="#6366f1" badge="!" />
-      </AbsoluteFill>
+                const scale = interpolate(progress, [0, 1], [0.8, 1]);
+                const opacity = interpolate(progress, [0, 0.5], [0, 1]);
 
-      {/* ACT 3: KINETIC HEADLINE */}
-      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', zIndex: 100 }}>
-        <div style={{
-          transform: `scale(${spring({ frame: frame - 10, fps })})`,
-          textAlign: 'center',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(4px)',
-          padding: '60px 100px',
-          borderRadius: 60,
-          opacity: interpolate(frame, [0, 10, 100, 120], [0, 1, 1, 0])
-        }}>
-          <h1 style={{
-            ...themeStyles.typography.h1,
-            fontSize: 120,
-            margin: 0,
-            color: frame > 90 ? 'white' : '#0f172a',
-            textShadow: '0 20px 40px rgba(0,0,0,0.1)'
-          }}>
-            {scene.mainText || "Agency Chaos."}
-          </h1>
-          <p style={{
-            ...themeStyles.typography.body,
-            fontSize: 36,
-            marginTop: 20,
-            fontWeight: 700
-          }}>
-            {scene.subText || "Met with complete control."}
-          </p>
-        </div>
-      </AbsoluteFill>
+                // Gentle floating
+                const floatY = Math.sin((frame - msg.delay) / 35) * 8;
 
-    </AbsoluteFill>
-  );
+                const bgColor = msg.variant === 'green' ? '#dcf8c6' : '#0084ff';
+                const textColor = msg.variant === 'green' ? '#000' : '#fff';
+
+                return (
+                    <div
+                        key={`chat-${i}`}
+                        style={{
+                            position: 'absolute',
+                            left: `${msg.x * 100}%`,
+                            top: `${msg.y * 100}%`,
+                            transform: `translate(-50%, -50%) translateY(${floatY}px) scale(${scale})`,
+                            opacity,
+                            zIndex: 20 + i
+                        }}
+                    >
+                        <div style={{
+                            background: bgColor,
+                            color: textColor,
+                            padding: '12px 16px',
+                            borderRadius: 12,
+                            fontSize: 24,
+                            fontWeight: 500,
+                            lineHeight: 1.4,
+                            boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                            maxWidth: 900,
+                            whiteSpace: 'pre-line',
+                            fontFamily: themeStyles.bodyFont
+                        }}>
+                            {msg.text}
+                            {msg.timestamp && (
+                                <div style={{
+                                    fontSize: 10,
+                                    opacity: 0.7,
+                                    marginTop: 4,
+                                    textAlign: 'right'
+                                }}>
+                                    {msg.timestamp}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Chat bubble tail */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: 10,
+                            left: msg.variant === 'green' ? -8 : 'auto',
+                            right: msg.variant === 'blue' ? -8 : 'auto',
+                            width: 0,
+                            height: 0,
+                            borderTop: `10px solid ${bgColor}`,
+                            borderLeft: msg.variant === 'green' ? '10px solid transparent' : 'none',
+                            borderRight: msg.variant === 'blue' ? '10px solid transparent' : 'none',
+                        }} />
+                    </div>
+                );
+            })}
+        </AbsoluteFill>
+    );
 };

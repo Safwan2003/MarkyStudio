@@ -1,5 +1,6 @@
 import { Composition } from "remotion";
-import { SaasExplainerTemplate } from "./templates/SaasExplainer";
+import { FronterTemplate } from "./templates/Fronter";
+import { Intro } from "./templates/Fronter/scenes/Intro";
 import "./style.css";
 
 export const RemotionRoot: React.FC = () => {
@@ -7,20 +8,51 @@ export const RemotionRoot: React.FC = () => {
     <>
       <Composition
         id="SaaS-Explainer"
-        component={SaasExplainerTemplate}
+        component={FronterTemplate}
         durationInFrames={300}
         fps={30}
         width={1920}
         height={1080}
         defaultProps={{
-          script: {
-            title: "Default",
-            scenes: [],
-            globalStyle: {
-              primaryColor: "#000",
-              backgroundColor: "#fff",
-              fontFamily: "Inter"
-            }
+          plan: {
+            brandName: "Fronter",
+            globalDesign: {
+              primaryColor: "#3b82f6",
+              secondaryColor: "#1e293b",
+              accentColor: "#f43f5e",
+              backgroundColor: "#ffffff",
+              textColor: "#0f172a",
+              headingFont: "Inter",
+              bodyFont: "Inter",
+              borderRadius: "8px"
+            },
+            scenes: []
+          }
+        }}
+      />
+      <Composition
+        id="Intro"
+        component={Intro}
+        durationInFrames={150} // 5 seconds
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          scene: {
+            id: "intro-1",
+            type: "intro",
+            duration: 5,
+            mainText: "Mockups connects the conceptual structure"
+          },
+          themeStyles: {
+            primary: "#3b82f6",
+            secondary: "#1e293b",
+            accent: "#f43f5e",
+            background: "#ffffff",
+            text: "#0f172a",
+            headingFont: "Inter",
+            bodyFont: "Inter",
+            borderRadius: "8px"
           }
         }}
       />
