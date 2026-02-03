@@ -80,29 +80,31 @@ const DEFAULT_SCRIPT: VideoScript = {
 };
 
 // --- Scene Timeline Component ---
-const SceneTimeline = ({ scenes, totalDuration, onSceneClick }: { scenes: any[], totalDuration: number, onSceneClick?: (time: number) => void }) => {
+const SceneTimeline = ({ scenes, totalDuration, selectedIndex, onSceneClick }: { scenes: any[], totalDuration: number, selectedIndex: number | null, onSceneClick?: (index: number, time: number) => void }) => {
   return (
     <div className="w-full h-12 flex gap-1 mt-4 relative group">
       {scenes.map((scene, idx) => {
         const widthPercent = ((scene.duration || 5) / totalDuration) * 100;
+        const isSelected = selectedIndex === idx;
         return (
           <div
             key={idx}
-            className="h-full bg-zinc-900 border border-white/10 first:rounded-l-lg last:rounded-r-lg relative overflow-hidden hover:bg-zinc-800 transition-colors cursor-pointer group/scene"
+            className={`h-full border first:rounded-l-lg last:rounded-r-lg relative overflow-hidden transition-all cursor-pointer group/scene ${isSelected ? 'bg-indigo-500/30 border-indigo-500 z-10' : 'bg-zinc-900 border-white/10 hover:bg-zinc-800'}`}
             style={{ width: `${widthPercent}%` }}
             onClick={() => {
               let startTime = 0;
               for (let i = 0; i < idx; i++) {
                 startTime += (scenes[i].duration || 5);
               }
-              onSceneClick?.(startTime);
+              onSceneClick?.(idx, startTime);
             }}
           >
             <div className="absolute inset-0 flex items-center justify-center p-1">
-              <span className="text-[10px] font-mono text-gray-500 truncate group-hover/scene:text-white transition-colors">
+              <span className={`text-[10px] font-mono truncate transition-colors ${isSelected ? 'text-white' : 'text-gray-500 group-hover/scene:text-white'}`}>
                 {scene.type.replace('_', ' ')}
               </span>
             </div>
+            {isSelected && <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-500" />}
           </div>
         )
       })}
@@ -123,6 +125,7 @@ export default function Home() {
   const [screenshotUrls, setScreenshotUrls] = useState<string[]>([]);
   const [generatedSubscenes, setGeneratedSubscenes] = useState<Subscene[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [selectedSceneIndex, setSelectedSceneIndex] = useState<number | null>(null);
 
   const playerRef = useRef<PlayerRef>(null);
 
@@ -417,16 +420,170 @@ export default function Home() {
               <SceneTimeline
                 scenes={script.scenes}
                 totalDuration={totalDuration}
-                onSceneClick={(time) => {
+                selectedIndex={selectedSceneIndex}
+                onSceneClick={(idx, time) => {
+                  setSelectedSceneIndex(idx);
                   if (playerRef.current) playerRef.current.seekTo(time * 30);
                 }}
               />
             </div>
 
             <div className="lg:col-span-4 space-y-6">
+              {/* Scene Editor */}
+              <div className="p-6 border border-white/10 bg-zinc-900/50 backdrop-blur-sm rounded-2xl space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bold text-lg">Scene Editor</h3>
+                  {selectedSceneIndex !== null && (
+                    <span className="text-xs px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded-full font-mono">
+                      Scene {selectedSceneIndex + 1}
+                    </span>
+                  )}
+                </div>
+
+                {selectedSceneIndex === null ? (
+                  <p className="text-gray-500 text-sm">Select a scene in the timeline to edit its contents.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Editor inputs will go here */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Main Text</label>
+                      <input
+                        type="text"
+                        className="w-full bg-black border border-white/10 rounded-lg p-3 text-sm focus:border-indigo-500 outline-none transition-colors"
+                        value={script.scenes[selectedSceneIndex].mainText || ""}
+                        onChange={(e) => {
+                          const newScenes = [...script.scenes];
+                          newScenes[selectedSceneIndex] = { ...newScenes[selectedSceneIndex], mainText: e.target.value };
+                          setScript({ ...script, scenes: newScenes });
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Sub Text</label>
+                      <input
+                        type="text"
+                        className="w-full bg-black border border-white/10 rounded-lg p-3 text-sm focus:border-indigo-500 outline-none transition-colors"
+                        value={script.scenes[selectedSceneIndex].subText || ""}
+                        onChange={(e) => {
+                          const newScenes = [...script.scenes];
+                          newScenes[selectedSceneIndex] = { ...newScenes[selectedSceneIndex], subText: e.target.value };
+                          setScript({ ...script, scenes: newScenes });
+                        }}
+                      />
+                    </div>
+
+                    {(script.scenes[selectedSceneIndex].type === 'intro' || script.scenes[selectedSceneIndex].type === 'cta') && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">CTA Text</label>
+                        <input
+                          type="text"
+                          className="w-full bg-black border border-white/10 rounded-lg p-3 text-sm focus:border-indigo-500 outline-none transition-colors"
+                          value={script.scenes[selectedSceneIndex].ctaText || ""}
+                          onChange={(e) => {
+                            const newScenes = [...script.scenes];
+                            newScenes[selectedSceneIndex] = { ...newScenes[selectedSceneIndex], ctaText: e.target.value };
+                            setScript({ ...script, scenes: newScenes });
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Screenshot Upload Helpers */}
+                    <div className="pt-2 space-y-4">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">Desktop Screenshot</label>
+                          {script.scenes[selectedSceneIndex].screenshotUrl && (
+                            <button
+                              onClick={() => {
+                                const newScenes = [...script.scenes];
+                                delete newScenes[selectedSceneIndex].screenshotUrl;
+                                setScript({ ...script, scenes: newScenes });
+                              }}
+                              className="text-[10px] text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id="desktop-upload"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                const newScenes = [...script.scenes];
+                                newScenes[selectedSceneIndex] = { ...newScenes[selectedSceneIndex], screenshotUrl: event.target?.result as string };
+                                setScript({ ...script, scenes: newScenes });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <label htmlFor="desktop-upload" className="relative group flex flex-col items-center justify-center gap-2 p-1 border border-dashed border-white/20 rounded-lg hover:border-indigo-500/50 hover:bg-indigo-500/5 cursor-pointer transition-all overflow-hidden min-h-[80px]">
+                          {script.scenes[selectedSceneIndex].screenshotUrl ? (
+                            <img src={script.scenes[selectedSceneIndex].screenshotUrl} className="w-full h-full object-contain max-h-[120px] rounded" alt="Preview" />
+                          ) : (
+                            <span className="text-sm text-gray-400 py-4">Click to upload Desktop view</span>
+                          )}
+                        </label>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mobile Screenshot</label>
+                          {script.scenes[selectedSceneIndex].mobileScreenshotUrl && (
+                            <button
+                              onClick={() => {
+                                const newScenes = [...script.scenes];
+                                delete newScenes[selectedSceneIndex].mobileScreenshotUrl;
+                                setScript({ ...script, scenes: newScenes });
+                              }}
+                              className="text-[10px] text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id="mobile-upload"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                const newScenes = [...script.scenes];
+                                newScenes[selectedSceneIndex] = { ...newScenes[selectedSceneIndex], mobileScreenshotUrl: event.target?.result as string };
+                                setScript({ ...script, scenes: newScenes });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <label htmlFor="mobile-upload" className="relative group flex flex-col items-center justify-center gap-2 p-1 border border-dashed border-white/20 rounded-lg hover:border-indigo-500/50 hover:bg-indigo-500/5 cursor-pointer transition-all overflow-hidden min-h-[80px]">
+                          {script.scenes[selectedSceneIndex].mobileScreenshotUrl ? (
+                            <img src={script.scenes[selectedSceneIndex].mobileScreenshotUrl} className="w-full h-full object-contain max-h-[120px] rounded" alt="Preview" />
+                          ) : (
+                            <span className="text-sm text-gray-400 py-4">Click to upload Mobile view</span>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="p-4 border border-white/5 bg-white/5 rounded-2xl">
                 <h3 className="font-bold mb-4">Current Template: {selectedTemplate}</h3>
-                <button onClick={() => setCurrentStep(0)} className="w-full py-3 bg-white text-black rounded-xl font-bold">Change Template</button>
+                <button onClick={() => setCurrentStep(0)} className="w-full py-3 bg-white text-black rounded-xl font-bold transition hover:bg-gray-200">Change Template</button>
               </div>
             </div>
           </motion.div>

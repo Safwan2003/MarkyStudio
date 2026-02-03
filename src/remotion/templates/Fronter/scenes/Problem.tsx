@@ -85,7 +85,7 @@ const TEAM_MEMBERS = [
     },
 ];
 
-export const Problem: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ themeStyles }) => {
+export const Problem: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ scene, themeStyles }) => {
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
 
@@ -103,7 +103,25 @@ export const Problem: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ 
     const logoTextOpacity = interpolate(frame, [15, 40, 55, 70], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
     const logoIconOpacity = interpolate(frame, [60, 80, 95, 115], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
     const greetingOpacity = interpolate(frame, [105, 125, 140, 160], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-    const dashboardOpacity = interpolate(frame, [150, 170], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+    // Refined Staggered Animations for Dashboard Elements
+    const dashboardBaseStart = 150;
+
+    // Sidebar: Slides in from left
+    const sidebarOpacity = interpolate(frame, [dashboardBaseStart, dashboardBaseStart + 15], [0, 1], { extrapolateRight: 'clamp' });
+    const sidebarX = interpolate(sidebarOpacity, [0, 1], [-20, 0]);
+
+    // Header: Slides down
+    const headerOpacity = interpolate(frame, [dashboardBaseStart + 5, dashboardBaseStart + 20], [0, 1], { extrapolateRight: 'clamp' });
+    const headerY = interpolate(headerOpacity, [0, 1], [-10, 0]);
+
+    // Cards Row 1: Slide up
+    const cards1Opacity = interpolate(frame, [dashboardBaseStart + 10, dashboardBaseStart + 25], [0, 1], { extrapolateRight: 'clamp' });
+    const cards1Y = interpolate(cards1Opacity, [0, 1], [15, 0]);
+
+    // Cards Row 2: Slide up (slightly later)
+    const cards2Opacity = interpolate(frame, [dashboardBaseStart + 15, dashboardBaseStart + 30], [0, 1], { extrapolateRight: 'clamp' });
+    const cards2Y = interpolate(cards2Opacity, [0, 1], [15, 0]);
 
     const teamDelay = 185;
 
@@ -141,273 +159,297 @@ export const Problem: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ 
                     backgroundColor: '#ffffff',
                     boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)',
                 }}>
-                    {/* Screen Content - Transitions */}
-                    {/* Logo Text Only */}
-                    <div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#ffffff',
-                        opacity: logoTextOpacity,
-                        pointerEvents: logoTextOpacity > 0 ? 'auto' : 'none'
-                    }}>
-                        <div style={{
-                            background: '#ec4899',
-                            color: 'white',
-                            padding: '8px 24px',
-                            fontSize: 24,
-                            fontWeight: 900,
-                            letterSpacing: '0.1em',
-                            fontFamily: themeStyles.headingFont,
-                            transform: `scale(${interpolate(logoTextOpacity, [0, 1], [0.9, 1])})`
-                        }}>
-                            FRONTER
-                        </div>
-                    </div>
-
-                    {/* Logo with Icon */}
-                    <div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#ffffff',
-                        opacity: logoIconOpacity,
-                        pointerEvents: logoIconOpacity > 0 ? 'auto' : 'none'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            transform: `scale(${interpolate(logoIconOpacity, [0, 1], [0.9, 1])})`
-                        }}>
+                    {/* Dynamic Screen Content Logic */}
+                    {scene.screenshotUrl ? (
+                        <Img
+                            src={scene.screenshotUrl}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                            }}
+                        />
+                    ) : (
+                        <React.Fragment>
+                            {/* Screen Content - Transitions */}
+                            {/* Logo Text Only */}
                             <div style={{
-                                width: 40,
-                                height: 40,
-                                background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
-                                borderRadius: 8
-                            }} />
-                            <span style={{
-                                fontSize: 28,
-                                fontWeight: 900,
-                                color: '#0f172a',
-                                letterSpacing: '-0.02em',
-                                fontFamily: themeStyles.headingFont
-                            }}>FRONTER</span>
-                        </div>
-                    </div>
-
-                    {/* Greeting Screen */}
-                    <div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        padding: '10%',
-                        backgroundColor: '#ffffff',
-                        opacity: greetingOpacity,
-                        pointerEvents: greetingOpacity > 0 ? 'auto' : 'none',
-                        transform: `translateY(${interpolate(greetingOpacity, [0, 1], [10, 0])}px)`
-                    }}>
-                        <div style={{ marginBottom: 'auto' }}>
-                            <div style={{
-                                fontSize: 16,
-                                fontWeight: 700,
-                                color: '#0f172a',
-                                marginBottom: 4,
-                                fontFamily: themeStyles.headingFont
-                            }}>Hello, Lukaasz</div>
-                            <div style={{ fontSize: 7, color: '#64748b' }}>Welcome back to your workspace</div>
-                        </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                            <div style={{
-                                width: 30,
-                                height: 30,
-                                borderRadius: '50%',
-                                background: '#ec4899'
-                            }} />
-                            <div style={{
-                                width: 30,
-                                height: 30,
-                                borderRadius: '50%',
-                                background: '#8b5cf6'
-                            }} />
-                        </div>
-                    </div>
-
-                    {/* Dashboard - 3 Column Layout from Reference */}
-                    <div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        fontFamily: themeStyles.bodyFont,
-                        backgroundColor: '#f8fafc',
-                        opacity: dashboardOpacity,
-                        pointerEvents: dashboardOpacity > 0 ? 'auto' : 'none',
-                        transform: `translateY(${interpolate(dashboardOpacity, [0, 1], [10, 0])}px)`
-                    }}>
-                        {/* Sidebar */}
-                        <div style={{
-                            width: '20%',
-                            background: '#fff',
-                            borderRight: '1px solid #e2e8f0',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            paddingTop: '12%',
-                            gap: '15%'
-                        }}>
-                            <div style={{
-                                width: 24, height: 24,
-                                background: '#4f46e5',
-                                borderRadius: 6,
-                                color: 'white',
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
                                 display: 'flex',
-                                justifyContent: 'center',
                                 alignItems: 'center',
-                                fontSize: 14,
-                                fontWeight: 700
-                            }}>+</div>
-                            <BrandIcons.Home width={16} color="#64748b" />
-                            <BrandIcons.Activity width={16} color="#64748b" />
-                            <BrandIcons.Settings width={16} color="#64748b" />
-                        </div>
-
-                        {/* Main Dashboard Area */}
-                        <div style={{ flex: 1, padding: '8% 8%' }}>
-                            {/* Header */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6%' }}>
-                                <div>
-                                    <h2 style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', margin: 0 }}>Hello, Lukaasz</h2>
-                                    <p style={{ fontSize: 6, color: '#64748b', margin: '2px 0 0 0' }}>What are you working on today?</p>
-                                </div>
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                opacity: logoTextOpacity,
+                                pointerEvents: logoTextOpacity > 0 ? 'auto' : 'none'
+                            }}>
                                 <div style={{
-                                    width: 20, height: 20,
-                                    borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                                    border: '2px solid #e2e8f0'
-                                }} />
+                                    background: '#ec4899',
+                                    color: 'white',
+                                    padding: '8px 24px',
+                                    fontSize: 24,
+                                    fontWeight: 900,
+                                    letterSpacing: '0.1em',
+                                    fontFamily: themeStyles.headingFont,
+                                    transform: `scale(${interpolate(logoTextOpacity, [0, 1], [0.9, 1])})`
+                                }}>
+                                    FRONTER
+                                </div>
                             </div>
 
-                            {/* Project Cards Grid - 3 Columns */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, gridAutoRows: '55px' }}>
-                                {/* Card 1: Power the Curious */}
+                            {/* Logo with Icon */}
+                            <div style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#ffffff',
+                                opacity: logoIconOpacity,
+                                pointerEvents: logoIconOpacity > 0 ? 'auto' : 'none'
+                            }}>
                                 <div style={{
-                                    background: 'white',
-                                    borderRadius: 6,
-                                    border: '1px solid #e2e8f0',
-                                    padding: 6,
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                                     display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-between'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div style={{ width: 12, height: 12, background: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%' }} />
-                                        </div>
-                                        <div style={{ fontSize: 3, color: '#94a3b8' }}>...</div>
-                                    </div>
-                                    <div>
-                                        <div style={{ fontSize: 4.5, fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>Power the<br />curious</div>
-                                        <div style={{ fontSize: 3, color: '#64748b', marginTop: 2 }}>SurveyMonkey</div>
-                                    </div>
-                                </div>
-
-                                {/* Card 2: ZONT */}
-                                <div style={{
-                                    background: '#000000',
-                                    borderRadius: 6,
-                                    padding: 6,
-                                    color: 'white',
-                                    position: 'relative',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{ fontSize: 3, color: '#94a3b8', marginBottom: 2 }}>ZONT</div>
-                                    <div style={{ fontSize: 4, fontWeight: 700, lineHeight: 1.2 }}>Exceptional<br />sound design<br />in your pocket</div>
-                                    <div style={{
-                                        position: 'absolute', bottom: -5, right: -5, width: 25, height: 25,
-                                        background: 'linear-gradient(135deg, #ef4444, #b91c1c)',
-                                        borderRadius: '50%', opacity: 0.9
-                                    }} />
-                                    <div style={{
-                                        position: 'absolute', bottom: 2, right: 2,
-                                        fontSize: 3, fontWeight: 800,
-                                        background: '#3b82f6', padding: '1px 3px', borderRadius: 2
-                                    }}>OPEN PROJECT</div>
-                                </div>
-
-                                {/* Card 3: The Update */}
-                                <div style={{
-                                    background: 'white',
-                                    borderRadius: 6,
-                                    border: '1px solid #e2e8f0',
-                                    padding: 6,
-                                    position: 'relative',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{ fontSize: 3, color: '#ef4444', fontWeight: 800, marginBottom: 2 }}>the.update</div>
-                                    <div style={{ fontSize: 4, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>A Roundtable<br />for creative pros</div>
-                                    <Img src={staticFile('/fronter_intro_laptop.jpg')} style={{
-                                        position: 'absolute', bottom: 0, left: 0,
-                                        width: '100%', height: '40%', objectFit: 'cover', opacity: 0.8
-                                    }} />
-                                    <div style={{ position: 'absolute', bottom: 0, left: 0, width: 3, height: '40%', background: '#ef4444' }} />
-                                </div>
-
-                                {/* Card 4: Test Sprint (Black) */}
-                                <div style={{
-                                    background: '#0f172a',
-                                    borderRadius: 6,
-                                    padding: 6,
-                                    color: 'white',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center'
-                                }}>
-                                    <div style={{
-                                        width: 12, height: 12, borderRadius: 2,
-                                        background: '#1e293b', marginBottom: 4,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                    }}>
-                                        <div style={{ width: 6, height: 6, border: '1px solid #4ade80', borderRadius: 1 }} />
-                                    </div>
-                                    <div style={{ fontSize: 4.5, fontWeight: 700 }}>Test Sprint<br />overview</div>
-                                </div>
-
-                                {/* Card 5: Light for Freedom (Green) */}
-                                <div style={{
-                                    background: '#064e3b',
-                                    borderRadius: 6,
-                                    padding: 6,
-                                    color: 'white',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
                                     alignItems: 'center',
-                                    textAlign: 'center'
+                                    gap: 12,
+                                    transform: `scale(${interpolate(logoIconOpacity, [0, 1], [0.9, 1])})`
                                 }}>
-                                    <div style={{ fontSize: 4, fontWeight: 600, opacity: 0.8 }}>Light for our</div>
-                                    <div style={{ fontSize: 4.5, fontWeight: 800, fontFamily: 'serif', fontStyle: 'italic', color: '#6ee7b7' }}>freedom</div>
-                                    <div style={{ marginTop: 4, width: 3, height: 3, borderRadius: '50%', background: '#34d399' }} />
+                                    <div style={{
+                                        width: 40,
+                                        height: 40,
+                                        background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+                                        borderRadius: 8
+                                    }} />
+                                    <span style={{
+                                        fontSize: 28,
+                                        fontWeight: 900,
+                                        color: '#0f172a',
+                                        letterSpacing: '-0.02em',
+                                        fontFamily: themeStyles.headingFont
+                                    }}>FRONTER</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Glare/Reflection Overlay */}
-                    <div style={{
-                        position: 'absolute', inset: 0,
-                        background: 'linear-gradient(120deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 60%)',
-                        pointerEvents: 'none'
-                    }} />
+                            {/* Greeting Screen */}
+                            <div style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                padding: '10%',
+                                backgroundColor: '#ffffff',
+                                opacity: greetingOpacity,
+                                pointerEvents: greetingOpacity > 0 ? 'auto' : 'none',
+                                // Entrance (original), Exit (Slide Up)
+                                transform: `translateY(${interpolate(frame, [105, 125, 140, 160], [10, 0, 0, -20], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}px)`
+                            }}>
+                                <div style={{ marginBottom: 'auto' }}>
+                                    <div style={{
+                                        fontSize: 16,
+                                        fontWeight: 700,
+                                        color: '#0f172a',
+                                        marginBottom: 4,
+                                        fontFamily: themeStyles.headingFont
+                                    }}>Hello, Lukaasz</div>
+                                    <div style={{ fontSize: 7, color: '#64748b' }}>Welcome back to your workspace</div>
+                                </div>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <div style={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: '50%',
+                                        background: '#ec4899'
+                                    }} />
+                                    <div style={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: '50%',
+                                        background: '#8b5cf6'
+                                    }} />
+                                </div>
+                            </div>
+
+                            {/* Dashboard - 3 Column Layout from Reference */}
+                            <div style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                fontFamily: themeStyles.bodyFont,
+                                backgroundColor: '#f8fafc',
+                                // Dashboard container is visible, children animate inside
+                                opacity: 1,
+                                pointerEvents: frame > dashboardBaseStart ? 'auto' : 'none',
+                            }}>
+                                {/* Sidebar */}
+                                <div style={{
+                                    width: '20%',
+                                    background: '#fff',
+                                    borderRight: '1px solid #e2e8f0',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    paddingTop: '12%',
+                                    gap: '15%',
+                                    opacity: sidebarOpacity,
+                                    transform: `translateX(${sidebarX}px)`
+                                }}>
+                                    <div style={{
+                                        width: 24, height: 24,
+                                        background: '#4f46e5',
+                                        borderRadius: 6,
+                                        color: 'white',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        fontSize: 14,
+                                        fontWeight: 700
+                                    }}>+</div>
+                                    <BrandIcons.Home width={16} color="#64748b" />
+                                    <BrandIcons.Activity width={16} color="#64748b" />
+                                    <BrandIcons.Settings width={16} color="#64748b" />
+                                </div>
+
+                                {/* Main Dashboard Area */}
+                                <div style={{ flex: 1, padding: '8% 8%' }}>
+                                    {/* Header */}
+                                    <div style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6%',
+                                        opacity: headerOpacity,
+                                        transform: `translateY(${headerY}px)`
+                                    }}>
+                                        <div>
+                                            <h2 style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', margin: 0 }}>Hello, Lukaasz</h2>
+                                            <p style={{ fontSize: 6, color: '#64748b', margin: '2px 0 0 0' }}>What are you working on today?</p>
+                                        </div>
+                                        <div style={{
+                                            width: 20, height: 20,
+                                            borderRadius: '50%',
+                                            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                            border: '2px solid #e2e8f0'
+                                        }} />
+                                    </div>
+
+                                    {/* Project Cards Grid - 3 Columns */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, gridAutoRows: '55px' }}>
+                                        {/* Card 1: Power the Curious */}
+                                        <div style={{
+                                            background: 'white',
+                                            borderRadius: 6,
+                                            border: '1px solid #e2e8f0',
+                                            padding: 6,
+                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'space-between',
+                                            opacity: cards1Opacity,
+                                            transform: `translateY(${cards1Y}px)`
+                                        }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ width: 12, height: 12, background: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%' }} />
+                                                </div>
+                                                <div style={{ fontSize: 3, color: '#94a3b8' }}>...</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: 4.5, fontWeight: 800, color: '#0f172a', lineHeight: 1.1 }}>Power the<br />curious</div>
+                                                <div style={{ fontSize: 3, color: '#64748b', marginTop: 2 }}>SurveyMonkey</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Card 2: ZONT */}
+                                        <div style={{
+                                            background: '#000000',
+                                            borderRadius: 6,
+                                            padding: 6,
+                                            color: 'white',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            opacity: cards1Opacity,
+                                            transform: `translateY(${cards1Y}px)`
+                                        }}>
+                                            <div style={{ fontSize: 3, color: '#94a3b8', marginBottom: 2 }}>ZONT</div>
+                                            <div style={{ fontSize: 4, fontWeight: 700, lineHeight: 1.2 }}>Exceptional<br />sound design<br />in your pocket</div>
+                                            <div style={{
+                                                position: 'absolute', bottom: -5, right: -5, width: 25, height: 25,
+                                                background: 'linear-gradient(135deg, #ef4444, #b91c1c)',
+                                                borderRadius: '50%', opacity: 0.9
+                                            }} />
+                                            <div style={{
+                                                position: 'absolute', bottom: 2, right: 2,
+                                                fontSize: 3, fontWeight: 800,
+                                                background: '#3b82f6', padding: '1px 3px', borderRadius: 2
+                                            }}>OPEN PROJECT</div>
+                                        </div>
+
+                                        {/* Card 3: The Update */}
+                                        <div style={{
+                                            background: 'white',
+                                            borderRadius: 6,
+                                            border: '1px solid #e2e8f0',
+                                            padding: 6,
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            opacity: cards1Opacity,
+                                            transform: `translateY(${cards1Y}px)`
+                                        }}>
+                                            <div style={{ fontSize: 3, color: '#ef4444', fontWeight: 800, marginBottom: 2 }}>the.update</div>
+                                            <div style={{ fontSize: 4, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>A Roundtable<br />for creative pros</div>
+                                            <Img src={scene.mobileScreenshotUrl || staticFile('/fronter_intro_laptop.jpg')} style={{
+                                                position: 'absolute', bottom: 0, left: 0,
+                                                width: '100%', height: '40%', objectFit: 'cover', opacity: 0.8
+                                            }} />
+                                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: 3, height: '40%', background: '#ef4444' }} />
+                                        </div>
+
+                                        {/* Card 4: Test Sprint (Black) */}
+                                        <div style={{
+                                            background: '#0f172a',
+                                            borderRadius: 6,
+                                            padding: 6,
+                                            color: 'white',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            opacity: cards2Opacity,
+                                            transform: `translateY(${cards2Y}px)`
+                                        }}>
+                                            <div style={{
+                                                width: 12, height: 12, borderRadius: 2,
+                                                background: '#1e293b', marginBottom: 4,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <div style={{ width: 6, height: 6, border: '1px solid #4ade80', borderRadius: 1 }} />
+                                            </div>
+                                            <div style={{ fontSize: 4.5, fontWeight: 700 }}>Test Sprint<br />overview</div>
+                                        </div>
+
+                                        {/* Card 5: Light for Freedom (Green) */}
+                                        <div style={{
+                                            background: '#064e3b',
+                                            borderRadius: 6,
+                                            padding: 6,
+                                            color: 'white',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            textAlign: 'center',
+                                            opacity: cards2Opacity,
+                                            transform: `translateY(${cards2Y}px)`
+                                        }}>
+                                            <div style={{ fontSize: 4, fontWeight: 600, opacity: 0.8 }}>Light for our</div>
+                                            <div style={{ fontSize: 4.5, fontWeight: 800, fontFamily: 'serif', fontStyle: 'italic', color: '#6ee7b7' }}>freedom</div>
+                                            <div style={{ marginTop: 4, width: 3, height: 3, borderRadius: '50%', background: '#34d399' }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </React.Fragment>
+                    )}
                 </div>
             </div>
 
@@ -442,7 +484,7 @@ export const Problem: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ 
                             opacity: opacity * 0.4,
                             zIndex: 5
                         }}>
-                            <line
+                            {/* <line
                                 x1={`${member.x * 100}%`}
                                 y1={`${member.y * 100}%`}
                                 x2="50%"
@@ -451,7 +493,7 @@ export const Problem: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ 
                                 strokeWidth="1.5"
                                 strokeDasharray="4,4"
                                 strokeDashoffset={-lineDashOffset}
-                            />
+                            /> */}
                             <circle cx={`${member.x * 100}%`} cy={`${member.y * 100}%`} r="3" fill="white" fillOpacity={0.5} />
                         </svg>
 

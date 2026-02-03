@@ -194,5 +194,67 @@ export const BrandIcons = {
             <rect width="24" height="24" rx="4" fill="#EF4444" />
             <path d="M6 6H9M6 6V9M18 6H15M18 6V9M6 18H9M6 18V15M18 18H15M18 18V15" stroke="white" strokeWidth="2" strokeLinecap="round" />
         </svg>
-    )
+    ),
+    GitHub: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="currentColor" />
+        </svg>
+    ),
+    Heart: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+    ),
+    CheckCircle: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+    ),
+    Trello: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <rect x="3" y="3" width="18" height="18" rx="2" fill="#0079BF" />
+            <rect x="5.5" y="5.5" width="5.5" height="11" rx="1" fill="#fff" opacity="0.8" />
+            <rect x="13" y="5.5" width="5.5" height="7" rx="1" fill="#fff" opacity="0.8" />
+        </svg>
+    ),
+    Asana: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <circle cx="12" cy="12" r="5" fill="#F06A6A" />
+            <circle cx="19" cy="5" r="3" fill="#F06A6A" />
+            <circle cx="5" cy="19" r="3" fill="#F06A6A" />
+        </svg>
+    ),
+    Notion: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path d="M4.364 2.527a.267.267 0 0 0-.083.003l-2.6.438a.267.267 0 0 0-.214.316l.164 1.586a.208.208 0 0 0 .195.187l.426.027c.504.032.612.296.536.8L2.096 16.29c-.07.46-.372.636-.882.68l-.403.04a.208.208 0 0 0-.174.23l.182 1.764c.006.06.04.113.093.146.053.033.118.04.178.02l8.846-3.419a.267.267 0 0 0 .17-.23l.154-1.503a.208.208 0 0 0-.16-.221l-.578-.124c-.502-.108-.59-.395-.494-.897l.794-4.148 2.76 6.008c.159.412.048.756-.554.884l-.579.123a.208.208 0 0 0-.16.222l.159 1.517a.267.267 0 0 0 .285.236l7.749-1.638a.267.267 0 0 0 .207-.32l-.16-1.55a.208.208 0 0 0-.198-.186l-.427-.018c-.538-.022-.686-.312-.607-.822l1.109-7.142c.078-.501.354-.69.873-.722l.418-.026a.208.208 0 0 0 .194-.22l-.174-1.69a.267.267 0 0 0-.279-.239l-4.706.793a.267.267 0 0 0-.203.189l-3.322 8.783L7.84 5.21c-.246-.537-.113-.88.487-1.006l.515-.109a.208.208 0 0 0 .16-.222L8.85 2.373a.267.267 0 0 0-.23-.292L4.364 2.527z" fill="currentColor" />
+        </svg>
+    ),
+    Monday: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <circle cx="12" cy="12" r="12" fill="#F8F8F8" />
+            <path d="M17.65 6.8c-1.57 0-2.85 1.28-2.85 2.85v5.8c0 .28-.22.5-.5.5h-1.6c-.28 0-.5-.22-.5-.5V8.15c0-1.57-1.28-2.85-2.85-2.85s-2.85 1.28-2.85 2.85v7.3c0 .28-.22.5-.5.5H4.4c-.28 0-.5-.22-.5-.5V9.65C3.9 6.53 6.43 4 9.55 4s4.25 1.7 4.95 3.12C15.2 5.7 16.48 4 17.65 4" fill="#FFC933" />
+            <path d="M17.65 4c2.8 0 5.08 2.05 5.45 4.75.12.87.12.92.1 1.8 0 0 0 2.2-.05 2.7-.22 2.75-2.5 4.92-5.28 4.95-1.57 0-2.85-1.28-2.85-2.85V9.65c0-1.57 1.28-2.85 2.85-2.85" fill="#FF3D57" />
+            <path d="M9.35 15.45c-1.57 0-2.85-1.28-2.85-2.85s1.28-2.85 2.85-2.85 2.85 1.28 2.85 2.85-1.28 2.85-2.85 2.85" fill="#00C974" />
+        </svg>
+    ),
+    Monitor: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+    ),
+    Tablet: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
+    ),
+    Smartphone: (props: React.SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
+    ),
 };

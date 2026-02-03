@@ -1,11 +1,12 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, useCurrentFrame } from 'remotion';
 import { VideoScript, ThemeStyles } from '@/lib/types';
 
 import { Intro } from './scenes/Intro';
 import { Problem } from './scenes/Problem';
 import { Solution } from './scenes/Solution';
 import { Showcase } from './scenes/Showcase';
+import { SocialProof } from './scenes/SocialProof';
 import { CTA } from './scenes/CTA';
 
 // Default Theme 
@@ -56,6 +57,9 @@ export const FronterTemplate: React.FC<{ plan: VideoScript }> = ({ plan }) => {
                     break;
                 case 'showcase':
                     currentSceneComponent = <Showcase scene={scene} themeStyles={themeStyles} />;
+                    break;
+                case 'social_proof':
+                    currentSceneComponent = <SocialProof scene={scene} themeStyles={themeStyles} />;
                     break;
                 case 'cta':
                     currentSceneComponent = <CTA scene={scene} themeStyles={themeStyles} />;

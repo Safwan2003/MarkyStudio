@@ -36,7 +36,7 @@ const CHAT_MESSAGES = [
     },
 ];
 
-export const Intro: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ themeStyles }) => {
+export const Intro: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ scene, themeStyles }) => {
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
     return (
@@ -66,70 +66,91 @@ export const Intro: React.FC<{ scene: Scene, themeStyles: ThemeStyles }> = ({ th
                 backgroundColor: '#ffffff', // Screen base color
                 boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)', // Inner shadow for depth
             }}>
-                {/* Website Content - Matched to Reference */}
-                <div style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    padding: '6% 8%', // Adjusted padding for the perspective
-                    fontFamily: themeStyles.bodyFont,
-                    backgroundColor: '#ffffff'
-                }}>
-                    {/* Navbar */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8%' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#6366f1' }} />
-                            <span style={{ fontSize: 9, fontWeight: 700, color: '#0f172a' }}>Company</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                            <span style={{ fontSize: 6, fontWeight: 600, color: '#64748b' }}>Features</span>
-                            <span style={{ fontSize: 6, fontWeight: 600, color: '#64748b' }}>Pricing</span>
-                            <div style={{ padding: '3px 8px', background: '#4f46e5', borderRadius: 3, color: 'white', fontSize: 6, fontWeight: 600 }}>Sign Up</div>
-                        </div>
-                    </div>
-
-                    {/* Hero Section */}
-
-                    <h1 style={{
-                        fontSize: 18, fontWeight: 800, color: '#0f172a', lineHeight: 1.1, marginBottom: 8,
-                        fontFamily: themeStyles.headingFont, width: '70%', letterSpacing: '-0.02em'
-                    }}>
-                        Mockups connects the conceptual structure
-                    </h1>
-                    <p style={{ fontSize: 6, color: '#64748b', maxWidth: '60%', lineHeight: 1.5, marginBottom: 12 }}>
-                        For the quick brown fox jumps over the lazy dog. This text is a placeholder.
-                    </p>
-
+                {/* Screen Content Logic */}
+                {scene.screenshotUrl ? (
+                    <Img
+                        src={scene.screenshotUrl}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                        }}
+                    />
+                ) : (
+                    /* Website Content - Matched to Reference */
                     <div style={{
-                        padding: '5px 12px', background: '#4f46e5', borderRadius: 4,
-                        color: 'white', fontSize: 7, fontWeight: 600, width: 'fit-content',
-                        boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.3)'
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        padding: '6% 8%', // Adjusted padding for the perspective
+                        fontFamily: themeStyles.bodyFont,
+                        backgroundColor: '#ffffff'
                     }}>
-                        Read More
-                    </div>
-
-                    {/* Mobile Mockup Preview (Bottom Right) */}
-                    <div style={{
-                        position: 'absolute',
-                        right: '8%', bottom: '-10%',
-                        width: '35%', height: '70%',
-                        background: '#0f172a',
-                        borderRadius: '8px',
-                        border: '2px solid #1e293b',
-                        boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
-                        transform: 'rotate(-5deg)',
-                        overflow: 'hidden'
-                    }}>
-                        {/* Content inside phone */}
-                        <div style={{ width: '100%', height: '10%', background: '#1e293b', borderBottom: '1px solid #334155' }} />
-                        <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <div style={{ width: '60%', height: 4, background: '#334155', borderRadius: 2 }} />
-                            <div style={{ width: '80%', height: 4, background: '#334155', borderRadius: 2 }} />
+                        {/* Navbar */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8%' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#6366f1' }} />
+                                <span style={{ fontSize: 9, fontWeight: 700, color: '#0f172a' }}>Company</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                                <span style={{ fontSize: 6, fontWeight: 600, color: '#64748b' }}>Features</span>
+                                <span style={{ fontSize: 6, fontWeight: 600, color: '#64748b' }}>Pricing</span>
+                                <div style={{ padding: '3px 8px', background: '#4f46e5', borderRadius: 3, color: 'white', fontSize: 6, fontWeight: 600 }}>Sign Up</div>
+                            </div>
                         </div>
-                    </div>
 
-                </div>
+                        {/* Hero Section */}
+
+                        <h1 style={{
+                            fontSize: 18, fontWeight: 800, color: '#0f172a', lineHeight: 1.1, marginBottom: 8,
+                            fontFamily: themeStyles.headingFont, width: '70%', letterSpacing: '-0.02em'
+                        }}>
+                            {scene.mainText || 'Mockups connects the conceptual structure'}
+                        </h1>
+                        <p style={{ fontSize: 6, color: '#64748b', maxWidth: '60%', lineHeight: 1.5, marginBottom: 12 }}>
+                            {scene.subText || 'For the quick brown fox jumps over the lazy dog. This text is a placeholder.'}
+                        </p>
+
+                        <div style={{
+                            padding: '5px 12px', background: '#4f46e5', borderRadius: 4,
+                            color: 'white', fontSize: 7, fontWeight: 600, width: 'fit-content',
+                            boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.3)'
+                        }}>
+                            {scene.ctaText || 'Read More'}
+                        </div>
+
+                        {/* Mobile Mockup Preview (Bottom Right) */}
+                        <div style={{
+                            position: 'absolute',
+                            right: '8%', bottom: '-10%',
+                            width: '35%', height: '70%',
+                            background: '#0f172a',
+                            borderRadius: '8px',
+                            border: '2px solid #1e293b',
+                            boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+                            transform: 'rotate(-5deg)',
+                            overflow: 'hidden'
+                        }}>
+                            {/* Dynamic Mobile Content */}
+                            {scene.mobileScreenshotUrl ? (
+                                <Img
+                                    src={scene.mobileScreenshotUrl}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <React.Fragment>
+                                    <div style={{ width: '100%', height: '10%', background: '#1e293b', borderBottom: '1px solid #334155' }} />
+                                    <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                        <div style={{ width: '60%', height: 4, background: '#334155', borderRadius: 2 }} />
+                                        <div style={{ width: '80%', height: 4, background: '#334155', borderRadius: 2 }} />
+                                    </div>
+                                </React.Fragment>
+                            )}
+                        </div>
+
+                    </div>
+                )}
 
                 {/* Glare/Reflection Overlay for Realism */}
                 <div style={{
